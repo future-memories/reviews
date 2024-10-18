@@ -27,9 +27,9 @@ document.addEventListener('x-memories-ready', () => {
   $('#btn-prev').addEventListener('click', controlPrev);
 });
 
-let controlListener = (key) => {
-  console.log('DBG: Key pressed: ', key);
-  switch (key) {
+let controlListener = (event) => {
+  console.log('DBG: Key pressed: ', event);
+  switch (event.key) {
     case 'a': controlBad(); break;
     case 's': controlOkay(); break;
     case 'd': controlGood(); break;
