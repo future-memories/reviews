@@ -1,0 +1,21 @@
+{
+  "name": "future-memory-reviews",
+  "version": "0.1.0",
+  "description": "Manage reviews of paid images",
+  "main": "main.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitiko/future-memory-reviews.git"
+  },
+  "keywords": [
+    "future-memory"
+  ],
+  "author": "Dimitar Rusev <mitikodev@gmail.com>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/mitiko/future-memory-reviews/issues"
+  },
+  "homepage": "https://github.com/mitiko/future-memory-reviews#readme"
+}
