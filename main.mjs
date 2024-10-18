@@ -1,7 +1,10 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-console.log('Hello World!');
+let $ = (id) => document.getElementById(id);
+let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
+
+console.log('Loaded imports');
 
 const firebaseConfig = {
   apiKey: "AIzaSyAas9R4-9q4Tyrv4LDQx1falWjmco_P4LE",
@@ -15,24 +18,45 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const volume = 12;
 
-// var volume = 500;
-let volume = 5;
+console.log('Initialized firestore');
+
+let allDocuments = [];
 let q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
+(await getDocs(q)).forEach((doc) => {
+  allDocuments.push(doc.data());
+});
+console.log(allDocuments[0]);
 
-// imgContainer.style.backgroundImage = `url(https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl})`;
+let memoryElements = [];
+allDocuments.forEach(data => {
+  let memory = document.createElement('div');
+  memory.className = 'memory';
 
-onSnapshot(q, (snapshot) => {
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    console.log(data)
-    // const card = createMemoryCard(data);
-    // if (card != null) {
-    //   if (firstUpdate == true) {
-    //     memory_cards.push(card);
-    //   } else {
-    //     memory_cards.unshift(card);
-    //   }
-    // }
-  })
+  let img = document.createElement('img');
+  img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
+  memory.appendChild(img);
+
+  let text = document.createElement('p');
+  text.className = 'memory-text';
+  let date = new Date(data.timestamp.seconds * 1000).toISOString();
+  text.innerHTML = `
+  <span class="userId float-l">${fm(data.userId)}</span>
+  <span class="type float-r">${data.type == 'Uploaded' ? 'U' : (console.log('type is not Uploaded', data), '?')}</span>
+  <br>
+  <span class="country">${data.country}</span>
+  `;
+  // <span class="date float-l">${date.split('T')[0]}</span>
+  // <span class="time float-r">${date.split('T')[1].split('.')[0]}</span>
+
+  // TODO: keywords
+  memory.appendChild(text);
+
+  memoryElements.push(memory);
+});
+
+let main = $('memory-container');
+memoryElements.forEach(element => {
+  main.appendChild(element);
 });

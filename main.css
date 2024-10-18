@@ -1,0 +1,68 @@
+/* ============ GLOBALS ============ */
+:root {
+    --card-width: 100px;
+    --border: 4px;
+}
+main { font-family: monospace; }
+
+/* ============ GENERIC ============ */
+div.flex { display: flex; flex-direction: row; gap: 1rem; }
+span.float-l { float: left; }
+span.float-r { float: right; }
+
+/* ============ LAYOUT ============ */
+section#memory-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-width));
+    gap: 1rem 5px; /* row gap, column gap */
+}
+
+section#current {
+    max-width: 140ch;
+    margin-inline: auto;
+    margin-bottom: 2rem;
+
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    grid-template-rows: 2fr 1fr;
+
+    grid-template-areas: "img status" "img controls";
+}
+section#current > img#current-memory { grid-area: img; }
+section#current > div#status { grid-area: status; }
+section#current > div#controls { grid-area: controls; }
+
+/* ============ MEMORIES ============ */
+.memory { width: var(--card-width); }
+.memory > img {
+    --w: calc(var(--card-width) - 2 * var(--border));
+    width: var(--w);
+    height: calc(1.5 * var(--w));
+
+    object-fit: cover;
+    border: var(--border) solid rgb(0, 213, 0);
+}
+.memory > p { margin-block: 0; }
+.memory > p span.userId { font-weight: bold; }
+.memory > p span.type { font-weight: bold; color: silver; }
+
+/* ============ STATUS ============ */
+img#current-memory {
+    width: 300px;
+    height: 450px;
+    object-fit: cover;
+
+    border: var(--border) solid white;
+}
+
+table#status-table {
+    border-collapse: collapse;
+    border: 1px solid silver;
+}
+table#status-table th,
+table#status-table td {
+    text-align: left;
+    padding: 0.5rem;
+    border: 1px solid silver;
+    min-width: 12ch;
+}
