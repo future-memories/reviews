@@ -4,16 +4,6 @@ const url = new URLSearchParams(new URL(window.location.href).search);
 
 var reviewed = 0, index = 0, total = 0;
 var reviewData = [];
-var colorMap = {
-  'bad': 'red',
-  'okay': 'yellow',
-  'good': 'green',
-  'special': 'blue',
-  'special:bad': 'red',
-  'special:okay': 'yellow',
-  'special:good': 'green',
-  'pending': 'silver',
-};
 
 document.addEventListener('x-memories-ready', () => {
   total = window.memoryData.length;
@@ -78,22 +68,24 @@ let controlPrev = () => {
 }
 
 let setStatus = (status) => {
-  if (reviewData[index].status == 'pending' && status != 'pending' && status != 'special') {
+  let oldStatus = reviewData[index].status;
+  if ((oldStatus == 'pending' || oldStatus == 'special') && status != 'special') {
     reviewed += 1;
   }
-  reviewData[index].status = reviewData[index].status == 'special' ? `special:${status}` : status;
-  $('#current-memory').style.borderColor = colorMap[status];
-  window.memoryElements[index].querySelector('img').style.borderColor = colorMap[status];
-  if (status == 'special') {
-    // TODO: check if classlist already has special
-    window.memoryElements[index].querySelector('img').classList.add('special');
+
+  if (oldStatus == 'special') {
+    reviewData[index].status = (status == 'special' ? 'pending' : `special-${status}`);
+  } else if (oldStatus.startsWith('special-')) {
+    reviewData[index].status = (status == 'special' ? oldStatus.substring('special-'.length) : `special-${status}`);
+  } else {
+    reviewData[index].status = (status == 'special' ? `special-${oldStatus}` : status);
   }
 
   updateStatusFields();
 }
 
 let waitUpdateStatusFields = () => {
-  setTimeout(updateStatusFields, 500);
+  setTimeout(updateStatusFields, 200);
 }
 
 let updateStatusFields = () => {
@@ -103,7 +95,6 @@ let updateStatusFields = () => {
   let fullDate = new Date(data.timestamp.seconds * 1000).toISOString();
 
   $('#current-memory').src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
-  $('#current-memory').style.borderColor = colorMap[reviewData[index].status];
   $('#curr-status').innerText = `[i = ${index}] ${reviewData[index].status}`;
   $('#curr-user-id').innerText = fm(data.userId);
   $('#curr-date').innerText = fullDate.split('T')[0];
@@ -116,6 +107,9 @@ let updateStatusFields = () => {
   let percentage = Math.round(reviewed / total * 100 * 100) / 100;
   if (isNaN(percentage)) percentage = 0;
   $('#status-counter').innerText = `${reviewed} / ${total} reviewed (${percentage}%)`;
+
+  $('#current-memory').className = reviewData[index].status;
+  window.memoryElements[index].querySelector('img').className = reviewData[index].status;
 
   // only on first load.. basically
   if (index == 0) {

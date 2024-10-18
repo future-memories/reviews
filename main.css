@@ -45,10 +45,6 @@ section#current > div#controls { grid-area: controls; }
 .memory > p { margin-block: 0; }
 .memory > p span.userId { font-weight: bold; }
 .memory > p span.type { font-weight: bold; color: silver; }
-.memory > img.special {
-    border-inline-color: blue;
-    /* TODO: set border on memory card & border on image */
-}
 
 /* ============ STATUS ============ */
 img#current-memory {
@@ -68,5 +64,15 @@ table#status-table td {
     text-align: left;
     padding: 0.5rem;
     border: 1px solid silver;
-    min-width: 12ch;
 }
+table#status-table th { min-width: 12ch; }
+table#status-table td { min-width: 24ch; }
+
+/* ============ GENERIC OVERRIDES ============ */
+img.good { border-color: green !important; }
+img.okay { border-color: yellow !important; }
+img.bad { border-color: red !important; }
+img.special-pending { border-inline-color: blue !important; }
+img.special-good { border-inline-color: blue !important; border-block-color: green !important; }
+img.special-okay { border-inline-color: blue !important; border-block-color: yellow !important; }
+img.special-bad { border-inline-color: blue !important; border-block-color: red !important; }
