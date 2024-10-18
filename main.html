@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="main.css">
     <title>DEMO: FM Reviews</title>
+    <script defer src="load-images.mjs" type="module"></script>
+    <script defer src="controls.js"></script>
 </head>
 
 <body>
@@ -13,20 +15,19 @@
         <h1>FM Reviews</h1>
     </header>
     <main>
-        <!-- current image, status,  -->
         <section id="current">
-            <img id="current-memory" src="https://picsum.photos/300/450.jpg" alt="Placeholder image">
+            <img id="current-memory" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
             <div id="status">
                 <h3>Status</h3>
                 <div class="flex">
                     <table id="status-table">
                         <tr>
-                            <th>Memory ID</th>
-                            <td id="curr-memory-id">FMXXXXXX</td>
+                            <th>Status</th>
+                            <td id="curr-status">TBD</td>
                         </tr>
                         <tr>
                             <th>User ID</th>
-                            <td id="curr-memory-id">FMXXXXXX</td>
+                            <td id="curr-user-id">FMXXXXXX</td>
                         </tr>
                         <tr>
                             <th>Date</th>
@@ -51,7 +52,7 @@
                     </table>
                     <div id="status-review">
                         <p id="status-counter">X / Y reviewed</p>
-                        <p id="status-money">$XX.XX</p>
+                        <!-- <p id="status-money">$XX.XX</p> -->
                         <p id="review-recipient">FMXXXXXX</p>
                         <p id="review-date-range">YYYY-MM-DD to YYYY-MM-DD</p>
                     </div>
@@ -61,7 +62,7 @@
                 <h3>Controls</h3>
                 <ul>
                     <li>
-                        <button id="btn-good">Good</button>
+                        <button id="btn-bad">Bad</button>
                         or A
                     </li>
                     <li>
@@ -69,23 +70,26 @@
                         or S
                     </li>
                     <li>
-                        <button id="btn-bad">Bad</button>
+                        <button id="btn-good">Good</button>
                         or D
+                    </li>
+                    <li>
+                        <button id="btn-special">Mark special</button>
+                        or P
                     </li>
                     <li>
                         <button id="btn-skip">Skip</button>
                         or F
                     </li>
                     <li>
-                        <button id="btn-special">Mark special</button>
-                        or P
+                        <button id="btn-prev">Go to previous</button>
+                        or Q
                     </li>
                 </ul>
             </div>
         </section>
         <section id="memory-container"></section>
     </main>
-    <script src="main.mjs" type="module"></script>
 </body>
 
 </html>

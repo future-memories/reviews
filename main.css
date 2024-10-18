@@ -40,11 +40,15 @@ section#current > div#controls { grid-area: controls; }
     height: calc(1.5 * var(--w));
 
     object-fit: cover;
-    border: var(--border) solid rgb(0, 213, 0);
+    border: var(--border) solid silver;
 }
 .memory > p { margin-block: 0; }
 .memory > p span.userId { font-weight: bold; }
 .memory > p span.type { font-weight: bold; color: silver; }
+.memory > img.special {
+    border-inline-color: blue;
+    /* TODO: set border on memory card & border on image */
+}
 
 /* ============ STATUS ============ */
 img#current-memory {
