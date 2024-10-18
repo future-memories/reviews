@@ -102,7 +102,9 @@ let updateStatusFields = () => {
 
   $('#current-memory').src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
   $('#curr-status').innerText = `[i = ${index}] ${reviewData[index].status}`;
-  $('#curr-user-id').innerText = fm(data.userId);
+  // $('#curr-user-id').innerText = fm(data.userId);
+  // $('#curr-user-id').innerText = data.userId;
+  $('#curr-user-id').innerHTML = `<a href="/?userId=${data.userId}">${data.userId}</a>`;
   $('#curr-date').innerText = fullDate.split('T')[0];
   // $('#curr-time').innerText = fullDate.split('T')[1].split('.')[0];
   $('#curr-location').innerText = `${data.city}, ${data.country}`;
