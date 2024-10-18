@@ -10,6 +10,12 @@ document.addEventListener('x-memories-ready', () => {
   window.memoryData.forEach(_ => {
     reviewData.push({ status: 'pending' });
   });
+  for (let i = 0; i < window.memoryElements.length; i++) {
+    window.memoryElements[i].addEventListener('click', () => {
+      index = i;
+      updateStatusFields();
+    });
+  }
 
   updateStatusFields();
   document.addEventListener('keyup', controlListener);
