@@ -30,12 +30,12 @@ document.addEventListener('x-memories-ready', () => {
 let controlListener = (key) => {
   console.log('DBG: Key pressed: ', key);
   switch (key) {
-    case 'A': controlBad(); break;
-    case 'S': controlOkay(); break;
-    case 'D': controlGood(); break;
-    case 'F': controlSkip(); break;
-    case 'P': controlSpecial(); break;
-    case 'Q': controlPrev(); break;
+    case 'a': controlBad(); break;
+    case 's': controlOkay(); break;
+    case 'd': controlGood(); break;
+    case 'f': controlSkip(); break;
+    case 'p': controlSpecial(); break;
+    case 'q': controlPrev(); break;
     default:
       break;
   }
