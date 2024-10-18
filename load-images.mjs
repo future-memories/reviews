@@ -50,9 +50,15 @@ allDocuments.forEach(data => {
   memory.appendChild(img);
 
   let text = document.createElement('p');
+  let type;
+  switch (data.type) {
+    case 'Uploaded': type = 'U'; break;
+    case 'Saved': type = 'S'; break;
+    default: type = '?'; console.warn('Unrecognized memory type', data); break;
+  }
   text.innerHTML = `
   <span class="userId float-l">${fm(data.userId)}</span>
-  <span class="type float-r">${data.type == 'Uploaded' ? 'U' : (console.log('type is not Uploaded', data), '?')}</span>
+  <span class="type float-r">${type}</span>
   <br>
   <span class="country">${data.country}</span>
   `;
