@@ -5,6 +5,8 @@ let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 const url = new URLSearchParams(new URL(window.location.href).search);
 
+const userId = url['userId'] || '71nxIAj6SKeYBBTv7wiKYh03ap62';
+
 console.log('DBG: Loaded imports');
 
 const firebaseConfig = {
@@ -19,12 +21,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const volume = 12;
+const volume = 500;
 
 console.log('DBG: Initialized firestore');
 
 let allDocuments = [];
-let q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
+let q = query(collection(db, 'memory'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(volume));
+// let q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
 (await getDocs(q)).forEach((doc) => {
   allDocuments.push(doc.data());
 });
