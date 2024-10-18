@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://patr-3a75e.web.app/memories -->
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <title>Future Memory: Latest memories in matrix</title>
+  <meta name="description"
+    content="Future Memory allows you to explore raw memories from around the world in matrix view.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="google-adsense-account" content="ca-pub-4239908149039924">
+
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+
+
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@24,400,1,0" />
+
+
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+
+  <script src="/d3/d3.v7.min.js"></script>
+  <script src="/d3/ethers-5.2.umd.min.js"></script>
+  <script src="/d3/main.js"></script>
+  <link rel="stylesheet" href="/d3/style.css">
+
+
+  <link rel="stylesheet" href="/fm_style.css">
+
+  <script src="/js.js" async=""></script>
+
+
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16678836579">
+  </script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'AW-16678836579');
+  </script>
+
+  <!-- Event snippet for Page view conversion page -->
+  <script>
+    gtag('event', 'conversion', {
+      'send_to': 'AW-16678836579/RFsgCOiUmswZEOOyi5E-',
+      'value': 1.0,
+      'currency': 'ILS'
+    });
+  </script>
+
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4239908149039924"
+     crossorigin="anonymous"></script>
+
+
+</head>
+
+<body id="bodybody" class="matrix">
+
+  <div id="right-side">
+    <div id="username">Hello</div>
+    <div id="panel-selector">
+      <div class="panel-option selected" id="select-chat">GPT</div>
+      <div class="panel-option" id="select-wallet">WALLET</div>
+      <div class="panel-option" id="select-augment">AUGMENT</div>
+    </div>
+
+    <div id="chat">
+      <!--<iframe id="app-container" src="chat.html" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>-->
+    </div>
+  </div>
+
+  <div id="left-side">
+
+   <div id="bigad">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4239908149039924"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="autorelaxed"
+     data-ad-client="ca-pub-4239908149039924"
+     data-ad-slot="8867985787"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+    </div>
+
+    <div id="map" class="s"></div>
+    <div id="graph"></div>
+    <div id="data"></div>
+    <div id="buttons">
+      <button id="prev-btn"><span class="material-symbols-sharp">skip_previous</span></button>
+      <button id="play-btn"><span class="material-symbols-sharp">play_arrow </span></button>
+      <button id="stop-btn"><span class="material-symbols-sharp">stop</span></button>
+      <button id="next-btn"><span class="material-symbols-sharp">skip_next</span></button>
+    </div>
+  </div>
+
+  <div id="header">
+    <div id="header-left">
+      <div id="tite"><a href="/">Collective Memory</a></div>
+      <div id="subtitle">Latest memories:</div>
+    </div>
+    <div id="download"><a href="https://apps.apple.com/bg/app/f-m/id6503454642">JOIN THE MOVEMENT</a></div>
+    <div id="viewer">
+      <div>Viewer:</div>
+      <select name="viewer" id="viewer_mode">
+        <option value="matrix">Matrix</option>
+        <option value="small-matrix">Small Matrix</option>
+        <option value="map">Map</option>
+        <option value="tokens">Tokens</option>
+        <option value="graph">Graph</option>
+        <option value="memory-lane">Memory Lane</option>
+      </select>
+    </div>
+    <button id="open-right-panel"><span class="material-symbols-sharp">more_vert</span></button>
+  </div>
+  
+  <div class="adword">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4239908149039924"
+      crossorigin="anonymous"></script>
+    <ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w"
+      data-ad-client="ca-pub-4239908149039924" data-ad-slot="3762136364"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+    <!--
+    <amp-ad width="100vw" height="320"
+     type="adsense"
+     data-ad-client="ca-pub-4239908149039924"
+     data-ad-slot="4948922073"
+     data-auto-format="rspv"
+     data-full-width="">
+  <div overflow=""></div>
+</amp-ad>
+-->
+
+
+  </div>
+
+
+</body>
+
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+  var firstUpdate = true;
+  var currentView = 'matrix';
+  var previousView = 'map';
+  var dataDiv;
+  var map;
+  var snapshot_length = 0;
+  var current_shown_index = 5;
+  var maxCycles = 10;
+  var params;
+
+  var ads_index = 0;
+  var ads_pointer;
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAas9R4-9q4Tyrv4LDQx1falWjmco_P4LE",
+    authDomain: "patr-3a75e.firebaseapp.com",
+    projectId: "patr-3a75e",
+    storageBucket: "patr-3a75e.appspot.com",
+    messagingSenderId: "1067533396497",
+    appId: "1:1067533396497:web:6570ade6f7fda6df8f1fb0",
+    measurementId: "G-Y2ZJ3SMS32"
+  };
+
+  const selectElement = document.getElementById('viewer_mode');
+  const bodyDiv = document.getElementById('bodybody');
+  var memories = []
+  var memory_cards = []
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+
+  function setSEOTags() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewer = urlParams.get('viewer') || 'matrix';
+    document.title = `Future Memory: Latest memories in ${viewer}`;
+    document.querySelector('meta[name="description"]').setAttribute('content', `Future Memory allows you to explore raw memories from around the world in ${viewer} view.`);
+  }
+
+  //////////
+  // UUID //
+  //////////    
+  function generateUUID() {
+    // Generate a new UUID
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function checkAndStoreUUID() {
+    // Check if UUID is already stored in local storage
+    let uuid = localStorage.getItem('uuid');
+    if (!uuid) {
+      // If no UUID is found, generate a new one
+      uuid = generateUUID();
+      // Store the new UUID in local storage
+      localStorage.setItem('uuid', uuid);
+    }
+    return uuid;
+  }
+
+
+  // Call the function and log the UUID
+  const storedUUID = checkAndStoreUUID();
+  console.log('UUID:', storedUUID);
+  const username = 'FM' + storedUUID.substring(storedUUID.length - 6)
+
+  // END OF UUID //
+
+  //URL PARAMS//
+  function addUrlParameter(name, value) {
+    // Get the current URL
+    const currentUrl = window.location.href;
+
+    // Create a new URL object
+    const url = new URL(currentUrl);
+
+    // Get the URLSearchParams object
+    const params = new URLSearchParams(url.search);
+
+    // Set the new parameter
+    params.set(name, value);
+
+    // Update the URL with the new parameter
+    url.search = params.toString();
+
+    // Change the current URL without reloading the page
+    window.history.replaceState(null, null, url);
+
+    localStorage.setItem(name, value);
+
+  }
+
+  //END OF URL PARAMS//
+
+  // APP CONTAINER //
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const panelSelector = document.getElementById('panel-selector');
+    const panelOpenButton = document.getElementById('open-right-panel');
+    const options = panelSelector.getElementsByClassName('panel-option');
+    const iframe = document.getElementById('app-container');
+
+    const urlMap = {
+      'select-chat': '/chat.html',
+      'select-wallet': '/index.html?panel=closed&viewer=tokens&volume=100&mode=mini',
+      'select-augment': '/index.html?panel=closed&viewer=graph'
+    };
+
+    function updateIframeUrl(optionId) {
+      iframe.src = urlMap[optionId];
+    }
+
+    function clearSelected() {
+      for (let option of options) {
+        option.classList.remove('selected');
+      }
+    }
+
+
+    panelOpenButton.addEventListener('click', function (event) {
+      if (panel_mode == "open") {
+        panel_mode = "closed";
+        addUrlParameter('panel', panel_mode);
+      } else {
+        panel_mode = "open";
+        addUrlParameter('panel', panel_mode);
+      }
+
+      openClosePanel();
+
+    });
+
+    panelSelector.addEventListener('click', function (event) {
+      if (event.target.classList.contains('panel-option')) {
+        clearSelected();
+        event.target.classList.add('selected');
+        updateIframeUrl(event.target.id);
+      }
+    });
+  });
+
+  // END OF APP CONTAINER //
+
+  function modifyUserIds(creatorId, userId) {
+    const modifiedCreatorId = (creatorId.length >= 6
+      ? 'FM' + creatorId.substring(creatorId.length - 6)
+      : 'FM' + creatorId).toUpperCase();
+
+    const modifiedUserId = (userId.length >= 6
+      ? 'FM' + userId.substring(userId.length - 6)
+      : 'FM' + userId).toUpperCase();
+
+    return { modifiedCreatorId, modifiedUserId };
+  }
+
+
+
+
+
+  /*
+   function memoryLane() {
+ 
+     if (interval) {
+       clearInterval(interval);
+     }
+ 
+     console.log("memory lane!!")
+ 
+     const divs = document.querySelectorAll('.memory-card');
+     let index = 0;
+     interval = setInterval(() => {
+       // Hide all divs
+       divs.forEach(div => div.classList.add('hidden'));
+       divs.forEach(div => div.classList.remove('prev-memory'));
+ 
+       // Show the current div
+       let reverse_index = (divs.length - index - 1)
+       let reverse_index_prev = (divs.length - index)
+       divs[reverse_index].classList.remove('hidden');
+       if (divs[reverse_index_prev]){
+         var prev_memory = divs[reverse_index_prev]
+         prev_memory.classList.add('prev-memory');
+         prev_memory.classList.remove('hidden');
+       }
+       
+ 
+       // Increment the index
+       index += 1;
+ 
+       // Reset the index if it goes out of bounds
+       if (index >= divs.length) {
+         index = 0;
+       }
+     }, 300);
+ 
+   }*/
+
+  let interval;
+  let index = 0;
+  const delay = 300;
+  let divs = [];
+  var volume = 500;
+  var default_viewer = 'matrix';
+  var panel_mode = 'closed';
+
+
+  function showMemory(index) {
+
+    //console.log(index);
+
+    // Hide all divs and remove 'prev-memory' class
+    divs.forEach(div => {
+      div.classList.remove('visible');
+      div.classList.remove('prev-memory');
+    });
+
+    // Show the current div
+    let reverseIndex = (divs.length - index - 1);
+    let reverseIndexPrev = (divs.length - index);
+
+    if (reverseIndex >= 0 && divs[reverseIndex]) {
+      divs[reverseIndex].classList.add('visible');
+    }
+
+    if (reverseIndexPrev < divs.length && divs[reverseIndexPrev]) {
+      const prevMemory = divs[reverseIndexPrev];
+      prevMemory.classList.add('prev-memory');
+      prevMemory.classList.add('visible');
+    }
+  }
+
+  function memoryLane() {
+    if (interval) {
+      clearInterval(interval);
+    }
+
+    divs = document.querySelectorAll('.memory-card');
+    if (divs.length === 0) {
+      console.log("No memory cards found.");
+      return;
+    }
+
+    index = 0;
+    interval = setInterval(() => {
+      showMemory(index);
+
+      // Increment the index
+      index += 1;
+
+      // Reset the index if it goes out of bounds
+      if (index >= divs.length) {
+        index = 0;
+      }
+    }, delay);
+  }
+
+  document.getElementById('stop-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+    }
+  });
+
+  document.getElementById('play-btn').addEventListener('click', () => {
+    if (!interval) {
+      memoryLane();
+    }
+  });
+
+  document.getElementById('next-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+    }
+    index = (index + 1) % divs.length;
+    showMemory(index);
+  });
+
+  document.getElementById('prev-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+    }
+    index = (index - 1 + divs.length) % divs.length;
+    showMemory(index);
+  });
+
+
+  document.getElementById('stop-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+    }
+  });
+
+  document.getElementById('play-btn').addEventListener('click', () => {
+    if (!interval) {
+      memoryLane();
+    }
+  });
+
+  document.getElementById('next-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+    }
+    index = (index + 1) % divs.length;
+    showMemory(index);
+  });
+
+  document.getElementById('prev-btn').addEventListener('click', () => {
+    if (interval) {
+      clearInterval(interval);
+    }
+    index = (index - 1 + divs.length) % divs.length;
+    showMemory(index);
+  });
+
+
+
+  function createMemoryCard(data) {
+
+    let newString = data.imageId //data.creatorId + "_" + data.userId + "_" + data.timestamp.seconds;
+
+
+    /* THIS ENABLES CARDS UPDATE IN REAL TIME WITHOUT DELETING AND BUILDING EVEYTHING FROM THE GROUND */
+    if (memories.includes(newString)) {
+      //console.log("skipping")
+      return null;
+
+    } else {
+      memories.push(newString)
+      //console.log("adding " + newString)
+    }
+
+    const { modifiedCreatorId, modifiedUserId } = modifyUserIds(data.creatorId, data.userId);
+    const userIdDisplay = data.type === 'Saved'
+      ? `Saved by <a href="/user/${data.userId}">${modifiedUserId}</a> <br><a href="/user/${data.creatorId}">${modifiedCreatorId}</a>`
+      : `<a href="/user/${data.creatorId}">${modifiedCreatorId}</a>`;
+
+    const card = document.createElement('div');
+
+    card.className = 'memory-card';
+
+
+    const imgContainer = document.createElement('div');
+    imgContainer.className = 'image-container';
+    imgContainer.style.backgroundImage = `url(https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl})`;
+    imgContainer.addEventListener('click', () => {
+      window.location.href = `/memory/${data.imageId}/associations`;
+    });
+
+
+    var latitude = 0;
+    var longitude = 0;
+
+    if (data.latitude) {
+      latitude = data.latitude.toFixed(3);
+    }
+
+    if (data.longitude) {
+      longitude = data.longitude.toFixed(3);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'memory-info';
+    info.innerHTML = `
+    <p class="userId">${userIdDisplay}</p>
+    <p class="location" lat='${latitude}' long='${longitude}'>
+      <a href="/city/${encodeURIComponent(data.city)}">${data.city}</a>, 
+      <a href="/country/${encodeURIComponent(data.country)}">${data.country}</a>
+      <a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank">map</a>
+    </p>
+    <p class="datetime">${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
+    <p class="tags">${data.tags.map(tag => tag.keyword).join(', ')}</p>
+  `;
+
+
+
+    var ad_or_content = Math.random() * 10;
+    if (ad_or_content > 0) {
+      card.appendChild(imgContainer);
+      card.appendChild(info);
+    } else {
+
+      if (ads_index == 0) {
+        ads_pointer = document.querySelector('.adword');
+        // Clone the found div
+        var clonedAdwordDiv = ads_pointer; // 'true' means a deep clone, including all child elements
+        ads_index = ads_index + 1;
+        card.appendChild(clonedAdwordDiv);
+      } else {
+        var clonedAdwordDiv = ads_pointer.cloneNode(true); // 'true' means a deep clone, including all child elements
+      }
+
+    }
+
+    memory_cards.push[card]
+    return card;
+  }
+
+  var openClosePanel = function () {
+    if (panel_mode == "closed") {
+      bodyDiv.classList.add('panel-closed');
+      bodyDiv.classList.remove('panel-open');
+      document.documentElement.style.setProperty('--panel_size', '0px');
+
+    } else {
+      if (panel_mode == "open") {
+        bodyDiv.classList.remove('panel-closed');
+        bodyDiv.classList.add('panel-open');
+        document.documentElement.style.setProperty('--panel_size', '400px');
+      }
+    }
+
+    arrangeMatrix()
+
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    ///////clear ChatBot local storage on page load /////
+    ////////////////////////////////////////////////////
+    localStorage.removeItem('newMemories');
+    ////////////////////////////////////////////////////////
+
+    const usernameDiv = document.getElementById('username');
+
+    // Check if the element exists
+    if (usernameDiv) {
+      // Change the content of the div
+      usernameDiv.innerHTML = username
+    } else {
+      console.log('Element with id "username" not found.');
+    }
+
+
+    const url = window.location.href;
+
+    // Create a URLSearchParams object from the URL
+    params = new URLSearchParams(new URL(url).search);
+
+    // Get the value of the 'volume' parameter
+
+    var volume_url = params.get('volume');
+    if (volume_url) {
+      volume = Number(volume_url);
+    }
+
+    var panel_url = params.get('panel');
+    if (panel_url) {
+      if ((panel_url == "open") || (panel_url == "closed")) {
+        panel_mode = panel_url;
+      }
+    } else {
+      var local_panel = localStorage.getItem('panel')
+      if (local_panel) {
+        panel_mode = local_panel;
+      }
+    }
+
+    var viewer_url = params.get('viewer');
+    if (viewer_url) {
+      if ((viewer_url == "map") || (viewer_url == "graph")) {
+        viewer_url = "matrix"
+      };
+      currentView = viewer_url;
+      default_viewer = currentView;
+      bodyDiv.classList.add(currentView);
+      const viewerModeSelect = document.getElementById('viewer_mode');
+      viewerModeSelect.value = currentView;
+
+    } else {
+      var local_viewer = localStorage.getItem('viewer')
+      if (local_viewer) {
+        if ((local_viewer == "map") || (local_viewer == "graph")) {
+          local_viewer = "matrix"
+        };
+        currentView = local_viewer;
+        default_viewer = currentView;
+        bodyDiv.classList.add(currentView);
+        const viewerModeSelect = document.getElementById('viewer_mode');
+        viewerModeSelect.value = currentView;
+      }
+    }
+
+
+    var viewer_url = params.get('mode');
+    if (viewer_url == 'mini') {
+      bodyDiv.classList.add('mini');
+    }
+
+
+    openClosePanel();
+
+    //console.log(volume);  // This will log the value of 'volume' to the console
+
+    const path = window.location.pathname;
+    setSEOTags();
+    dataDiv = document.getElementById('data');
+
+    //mapbox
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoibnlwcGxlIiwiYSI6ImNsY2tvazgxcDBlbW4zb3J5MDFnMTh2NHUifQ.750wU8O1878n4i2Y6X0rFA';
+    map = new mapboxgl.Map({
+      container: 'map',
+      // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [12.550343, 55.665957],
+      zoom: 1.5
+    });
+
+    const mapDiv = document.getElementById('map');
+    mapDiv.className = '';
+    const style = document.createElement('style');
+    document.head.appendChild(style);
+    mapDiv.classList.add('s');
+
+    map.on('zoom', () => {
+      mapDiv.className = '';
+
+      const scalePercent = map.getZoom();
+
+      //document.documentElement.style.setProperty('--marker_width', '30px');
+
+      if (scalePercent < 5) {
+        mapDiv.classList.add('s');
+
+      }
+
+      if ((scalePercent > 5) && (scalePercent < 15)) {
+        mapDiv.classList.add('m');
+
+
+      }
+
+      if (scalePercent >= 15) {
+        mapDiv.classList.add('l');
+        document.documentElement.style.setProperty('--marker_width', 30 + (scalePercent * scalePercent * scalePercent * scalePercent) / 500 + 'px');
+      }
+
+
+    });
+
+
+    //end of mapbox
+
+
+    // Firebase and memory creation
+
+    const subtitleDiv = document.getElementById('subtitle');
+    var q;
+
+
+    //function to handle associations
+    async function fetchAssociations(imageId) {
+      // Fetch nearest neighbors
+      const response = await fetch('https://patr-3a75e.appspot.com/findNeighbors', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ imageId: imageId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error fetching associations:', errorData);
+        dataDiv.textContent = 'Error loading associations.';
+        return;
+      }
+
+      const result = await response.json();
+      //console.log('Fetched associations:', result);
+
+      if (result.nearestNeighbors && result.nearestNeighbors.length > 0) {
+        const neighbors = result.nearestNeighbors[0].neighbors;
+        const docIds = neighbors.map(neighbor => neighbor.datapoint.datapointId);
+
+        q = query(collection(db, 'memory'), where('imageId', 'in', docIds));
+
+
+        const querySnapshot = await getDocs(q);
+
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const card = createMemoryCard(data);
+
+          if (card != null) {
+
+
+            if (firstUpdate == true) {
+              memory_cards.push(card)
+            } else {
+              memory_cards.unshift(card)
+            }
+
+            //dataDiv.appendChild(card);
+
+          } else {
+            console.log("oh shit")
+          }
+
+        });
+
+        firstUpdate = false;
+
+
+        arrangeMatrix()
+
+        //const cardsData = [];
+        //querySnapshot.forEach(doc => {
+        //  const neighbor = neighbors.find(neighbor => neighbor.datapoint.datapointId === doc.id);
+        //  const distance = neighbor && neighbor.distance !== undefined ? neighbor.distance.toFixed(3) : '0.00';
+        //  cardsData.push({ data: doc.data(), id: doc.id, distance: distance });
+        //});
+
+        // Sort cards by distance
+        //cardsData.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+        //if (cardsData.length > 0) {
+        //  cardsData.forEach(({ data, id, distance }) => {
+        //  const card = createMemoryCard(data, id, distance);
+        //  dataDiv.appendChild(card);
+        //});
+        //} else {
+        //    dataDiv.textContent = 'No associations found.';
+        // }
+
+        //const memoryData = result.nearestNeighbors[0].memoryData;
+        //if (memoryData) {
+        //    setSEOTags(imageId, memoryData.location || 'Unknown', memoryData.timestamp || 0);
+        //} */
+      } else {
+        alert("WTF");
+      }
+    }
+
+
+
+
+    //extract var function
+    function extractSegment(url, prefix) {
+      const userPrefix = prefix;
+      const start = url.indexOf(userPrefix);
+
+      if (start === -1) {
+        return null; // "/user/" not found in the URL
+      }
+
+      // Start from the end of "/user/"
+      const segmentStart = start + userPrefix.length;
+      const segmentEnd = url.indexOf("/", segmentStart);
+
+      if (segmentEnd === -1) {
+        // No "/" found after "/user/", take the rest of the string
+        return url.substring(segmentStart);
+      }
+
+      // Extract the segment between "/user/" and the next "/"
+      return url.substring(segmentStart, segmentEnd);
+    }
+
+
+    const keywords = ["location", "user", "memory", "city", "country"];
+    let foundKeyword = null;
+
+    // Check if any keyword is in the URL
+    for (const keyword of keywords) {
+      if (path.includes(`/${keyword}/`)) {
+        foundKeyword = keyword;
+        break; // Stop at the first found keyword
+      }
+    }
+
+    // Process based on the found keyword
+    switch (foundKeyword) {
+      case "location":
+        //console.log("Processing location");
+        break;
+
+      case "user":
+        const userId = extractSegment(path, "/user/")
+        var cleanUserId = 'FM' + userId.substring(userId.length - 6)
+        subtitleDiv.textContent = 'Latest memories of ' + cleanUserId;
+        q = query(collection(db, 'memory'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(volume));
+        break;
+
+      case "memory":
+        const image_id = extractSegment(path, "/memory/")
+        subtitleDiv.textContent = 'Associations to memory #' + image_id;
+        //console.log("Processing memory");
+        fetchAssociations(image_id)
+        break;
+
+      case "city":
+        const city = decodeURIComponent(extractSegment(path, "/city/"))
+        subtitleDiv.textContent = 'Latest memories from ' + city;
+        q = query(collection(db, 'memory'), where('city', '==', city), orderBy('timestamp', 'desc'), limit(volume));
+        break;
+      case "country":
+        const country = decodeURIComponent(extractSegment(path, "/country/"))
+        subtitleDiv.textContent = 'Latest memories from ' + country;
+        q = query(collection(db, 'memory'), where('country', '==', country), orderBy('timestamp', 'desc'), limit(volume));
+        break;
+      default:
+        //console.log("No relevant keyword found");
+        q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
+        break;
+    }
+
+    /////////////////////////////////////////////////////////////////
+    ///// unsubcribe to real-time if AI is used ////////////////////
+    ////// clear each Chat ////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
+
+    let unsubscribeRealtime = null;  // Variable to hold the unsubscribe function
+
+    function clearAndLoadNewMemories() {
+
+      memories = [] //clear the duplicated memories storage from current view
+
+      // Unsubscribe from real-time updates if new memories are loaded
+      if (unsubscribeRealtime) {
+        unsubscribeRealtime();
+        unsubscribeRealtime = null; // Prevent further unsubscription attempts
+      }
+
+      // Clear the existing memory feed
+      dataDiv.innerHTML = '';
+      memory_cards = []; // Clear the memory cards array
+
+      const newMemories = JSON.parse(localStorage.getItem('newMemories') || '[]');
+      if (newMemories.length > 0) {
+        // Display only the new memories
+        newMemories.forEach(memoryData => {
+          const card = createMemoryCard(memoryData);
+          if (card != null) {
+            memory_cards.unshift(card);
+            dataDiv.appendChild(card); // Display the new memory
+          }
+        });
+
+        arrangeMatrix(); // Re-arrange the matrix with the new memories
+        return true; // Indicate that new memories were found and displayed
+      }
+      return false; // No new memories found
+    }
+
+    // Listen for changes in local storage
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'newMemories') {
+        clearAndLoadNewMemories();
+      }
+    });
+
+    // Initial load of new memories
+    const newMemoriesLoaded = clearAndLoadNewMemories();
+
+    if (!newMemoriesLoaded) {
+      // Proceed with real-time updates only if no new memories are found
+      unsubscribeRealtime = onSnapshot(q, (snapshot) => {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const card = createMemoryCard(data);
+          if (card != null) {
+            if (firstUpdate == true) {
+              memory_cards.push(card);
+            } else {
+              memory_cards.unshift(card);
+            }
+          }
+        });
+
+        firstUpdate = false;
+        arrangeMatrix();
+      }, (error) => {
+        console.error("Error fetching real-time updates: ", error);
+        dataDiv.textContent = "Error loading memories.";
+      });
+    }
+
+
+  });
+
+
+  /////////////////////
+
+
+  function arrangeMatrix() {
+
+
+
+    var itemWidth = 300; // Width of each item
+    var itemHeight = 500; // Height of each item
+    var gap = 10; //Space between items
+    var screenWidth = window.innerWidth;
+    var screenHeight = window.innerHeight;
+
+    const container = document.getElementById('left-side');
+    var items;// = memory_cards //document.querySelectorAll('.memory-card');
+
+    const containerWidth = container.clientWidth;
+    /*const containerHeight = container.clientHeight;*/
+
+    if ((currentView == 'small-matrix')) {
+      itemWidth = 85; // Width of each item
+      itemHeight = 220; // Height of each item
+      gap = 0; //Space between items
+    }
+
+    if ((currentView == 'tokens')) {
+      itemWidth = 390; // Width of each item
+      itemHeight = 60; // Height of each item
+      gap = 5; //Space between items
+    }
+
+    if ((currentView == 'memory-lane')) {
+
+      var viewportWidth = window.innerWidth;
+      var viewportHeight = window.innerWidth;
+
+      itemWidth = Math.min(400, viewportWidth * 0.7);
+      itemHeight = Math.min(550, viewportHeight * 0.7);
+
+      gap = 0; //Space between items
+    }
+
+
+
+    const itemsPerRow = Math.floor(containerWidth / (itemWidth + gap));
+
+    var centralizer = (containerWidth - (itemsPerRow * (itemWidth + gap) - gap)) / 2
+    var markers = [];
+
+    if (memory_cards.length > 0) {
+      if ((maxCycles == 10) && (memory_cards.length < 10)) {
+        current_shown_index = Math.min(current_shown_index, memory_cards.length);
+        maxCycles = Math.min(current_shown_index, memory_cards.length);
+      }
+    }
+    items = memory_cards.slice(current_shown_index);
+
+    /*//PLUS CARD
+    const firstElement = items[0];
+    if (firstElement) {
+      var bigPlus = firstElement.cloneNode(true);
+      bigPlus.classList.add('big-plus');
+      items.unshift(bigPlus);
+    }
+
+
+    const bigPlusElements = document.querySelectorAll('.big-plus');
+
+    // Remove each selected element from the DOM
+    bigPlusElements.forEach(el => {
+      el.parentNode.removeChild(el);
+    });
+
+    */
+
+
+    items.forEach((item, index) => {
+
+      var x;
+      var y;
+      var row;
+      var col;
+
+      if ((currentView == 'matrix') || (currentView == 'small-matrix') || (currentView == 'tokens') || (currentView == 'memory-lane')) {
+
+
+        if (currentView != 'memory-lane') {
+          row = Math.floor(index / itemsPerRow);
+          col = index % itemsPerRow;
+          x = col * (itemWidth + gap) + centralizer;
+          y = row * (itemHeight + gap) + 400;
+        }
+
+        if (currentView == 'memory-lane') {
+          x = (screenWidth - itemWidth) / 2;
+          y = (screenHeight - itemHeight) / 2;
+        }
+
+        item.style.left = x + 'px'
+        item.style.top = y + 'px'
+
+        item.style.width = itemWidth + 'px'
+        item.style.height = itemHeight + 'px'
+
+
+        if (dataDiv.contains(item)) {
+          //do nothing
+        } else {
+          dataDiv.appendChild(item);
+        }
+
+
+      } else {
+
+        if (currentView == 'map') {
+
+
+          // Perform operations on each card here
+          const location = item.querySelector('.location');
+
+
+          var lat = parseFloat(location.getAttribute('lat'));
+          var long = parseFloat(location.getAttribute('long'));
+
+          if (lat != 666) {
+
+            lat = lat + 0.0005 * (Math.random() - 0.5);
+            long = long + 0.0005 * (Math.random() - 0.5);
+
+            const marker = new mapboxgl.Marker(item)
+              .setLngLat([long, lat])
+              .addTo(map);
+
+            markers.push(marker)
+            marker.getElement().addEventListener('click', function (e) {
+              if (map.getZoom() < 15) {
+                map.flyTo({
+                  center: marker.getLngLat(),
+                  zoom: 16 // Adjust the zoom level as desired
+                });
+
+              }
+
+              e.preventDefault();
+              e.stopPropagation();
+
+            });
+
+          }
+
+        }
+
+        if (currentView == 'graph') {
+
+
+
+        }
+
+
+      }
+
+
+    })
+
+    try {
+
+      if (currentView == 'map') {
+        var lastMarker = markers[0];
+        map.flyTo({
+          center: lastMarker.getLngLat(),
+          zoom: 18 // Adjust the zoom level as desired
+        });
+      };
+    } catch {
+      console.log("error with map");
+    }
+
+
+    if (currentView == 'memory-lane') {
+      memoryLane();
+    };
+
+  }
+  //viewer selector
+
+
+  selectElement.addEventListener('change', function () {
+    bodyDiv.classList.remove('small-matrix');
+    bodyDiv.classList.remove('map');
+    bodyDiv.classList.remove('graph');
+    bodyDiv.classList.remove('tokens');
+    bodyDiv.classList.remove('matrix');
+    bodyDiv.classList.remove('memory-lane');
+
+    if (this.value === 'small-matrix') {
+      currentView = 'small-matrix';
+      bodyDiv.classList.add('small-matrix');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+    }
+    if (this.value === 'tokens') {
+      currentView = 'tokens';
+      bodyDiv.classList.add('tokens');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+    }
+    if (this.value === 'matrix') {
+      currentView = 'matrix';
+      bodyDiv.classList.add('matrix');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+    }
+    if (this.value === 'memory-lane') {
+      currentView = 'memory-lane';
+      bodyDiv.classList.add('memory-lane');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+    }
+    if (this.value === 'map') {
+      currentView = 'map';
+      bodyDiv.classList.add('map');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+    }
+    if (this.value === 'graph') {
+      currentView = 'graph';
+      bodyDiv.classList.add('graph');
+      addUrlParameter('viewer', this.value);
+      arrangeMatrix()
+      displayData();
+    }
+  });
+
+  setTimeout(function () {
+    arrangeMatrix()
+
+    function handleResize() {
+      console.log("resize!!");
+      arrangeMatrix()
+    }
+
+    // Attach the event listener to the window's resize event
+    window.addEventListener('resize', handleResize);
+
+
+  }, 100);
+
+  setTimeout(function () {
+
+    let counter = 0;
+    maxCycles = current_shown_index;
+
+    function executeCycle() {
+
+      counter++;
+      if (counter <= maxCycles) {
+        current_shown_index = current_shown_index - 1;
+        arrangeMatrix()
+        scheduleNextCycle();
+
+      } else {
+        //so nothing
+      }
+      // Schedule the next cycle with a random delay
+
+    }
+
+    // Function to schedule the next cycle with a random delay
+    function scheduleNextCycle() {
+      // Generate a random delay between 500ms and 3000ms
+      const randomDelay = Math.floor(Math.random() * (200)) + 1000;
+      setTimeout(executeCycle, randomDelay);
+    }
+
+    // Start the first cycle
+    scheduleNextCycle();
+
+
+  }, 2000);
+
+  setTimeout(function() {
+    // Create a new script element
+    var scriptElement = document.createElement('script');
+
+    // Set the attributes for the script element
+    scriptElement.async = true;
+    scriptElement.setAttribute('custom-element', 'amp-ad');
+    scriptElement.src = "https://cdn.ampproject.org/v0/amp-ad-0.1.js";
+
+    // Append the script element to the head of the document
+    document.head.appendChild(scriptElement);
+}, 4000); // 4000 milliseconds = 4 seconds
+
+
+</script>
+
+</html>
