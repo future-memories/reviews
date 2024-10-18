@@ -118,7 +118,7 @@ let updateStatusFields = () => {
     let minSeconds = window.memoryData[0].timestamp.seconds, maxSeconds = 0;
     window.memoryData.forEach(data => {
       minSeconds = Math.min(minSeconds, data.timestamp.seconds);
-      maxSeconds = Math.max(minSeconds, data.timestamp.seconds);
+      maxSeconds = Math.max(maxSeconds, data.timestamp.seconds);
     });
     let minDate = new Date(minSeconds * 1000).toISOString().split('T')[0];
     let maxDate = new Date(maxSeconds * 1000).toISOString().split('T')[0];
