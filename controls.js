@@ -91,7 +91,7 @@ let setStatus = (status) => {
 }
 
 let waitUpdateStatusFields = () => {
-  setTimeout(updateStatusFields, 200);
+  setTimeout(updateStatusFields, 100);
 }
 
 let updateStatusFields = () => {
