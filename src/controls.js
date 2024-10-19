@@ -108,9 +108,10 @@ let updateStatusFields = () => {
   $('#curr-date').innerText = fullDate.split('T')[0];
   // $('#curr-time').innerText = fullDate.split('T')[1].split('.')[0];
   $('#curr-location').innerText = `${data.city}, ${data.country}`;
-  $('#curr-tag1').innerText = `[w = ${data.tags[0].weight}] ${data.tags[0].keyword.toLowerCase()}`;
-  $('#curr-tag2').innerText = `[w = ${data.tags[1].weight}] ${data.tags[1].keyword.toLowerCase()}`;
-  $('#curr-tag3').innerText = `[w = ${data.tags[2].weight}] ${data.tags[2].keyword.toLowerCase()}`;
+  for (let i = 0; i < 3 && i < data.tags.length; i++)
+    $(`#curr-tag${i + 1}`).innerText = `[w = ${data.tags[i].weight}] ${data.tags[i].keyword.toLowerCase()}`;
+  for (let i = data.tags.length; i < 3; i++)
+    $(`#curr-tag${i + 1}`).innerText = "[w = ?] N/A";
 
   let percentage = Math.round(reviewed / total * 100 * 100) / 100;
   if (isNaN(percentage)) percentage = 0;
