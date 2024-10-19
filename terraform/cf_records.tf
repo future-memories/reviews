@@ -3,5 +3,5 @@ resource "cloudflare_record" "main" {
   name    = "fm"
   type    = "CNAME"
   proxied = true
-  content = "future-memory-reviews.pages.dev"
+  content = cloudflare_pages_project.main.subdomain
 }
