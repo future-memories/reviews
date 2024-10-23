@@ -1,6 +1,6 @@
 /* ============ GLOBALS ============ */
 :root {
-    --card-width: 100px;
+    --card-width: 180px;
     --border: 4px;
 }
 main { font-family: monospace; }

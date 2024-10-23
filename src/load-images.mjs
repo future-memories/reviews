@@ -1,11 +1,24 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, limit, doc, setDoc, getDocs, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 const url = new URLSearchParams(new URL(window.location.href).search);
 
 console.log('DBG: Loaded imports');
+
+let cats = [
+  'https://cdn2.thecatapi.com/images/100.jpg',
+  'https://cdn2.thecatapi.com/images/101.jpg',
+  'https://cdn2.thecatapi.com/images/102.jpg',
+  'https://cdn2.thecatapi.com/images/103.jpg',
+  'https://cdn2.thecatapi.com/images/104.jpg',
+  'https://cdn2.thecatapi.com/images/105.jpg',
+  'https://cdn2.thecatapi.com/images/106.jpg',
+  'https://cdn2.thecatapi.com/images/107.jpg',
+  'https://cdn2.thecatapi.com/images/108.jpg',
+  'https://cdn2.thecatapi.com/images/109.jpg',
+];
 
 const firebaseConfig = {
   apiKey: "AIzaSyAas9R4-9q4Tyrv4LDQx1falWjmco_P4LE",
@@ -19,50 +32,59 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const volume = 500;
+const volume = 100;
 
 console.log('DBG: Initialized firestore');
 
-let q;
-if (url.has('userId')) {
-  let userId = url.get('userId');
-  // let userId = '71nxIAj6SKeYBBTv7wiKYh03ap62';
-  q = query(collection(db, 'memory'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(volume));
-} else {
-  q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
-}
+let imageId = "uWTyDtW9JcCLWckP5sfS";
 
-let allDocuments = [];
-(await getDocs(q)).forEach((doc) => {
-  allDocuments.push(doc.data());
-});
-console.log('DBG: Queried documents');
-console.log(allDocuments[0]);
-window.memoryData = allDocuments;
+let qCat = query(collection(db, 'memory'), where('imageId', '==', imageId));
+let targetMems = [];
+(await getDocs(qCat)).forEach((doc) => targetMems.push(doc));
+console.log(targetMems[0]);
+// let mem = targetMems[0].data();
 
+// console.log(mem);
+
+// mem.oldImageUrl = mem.imageUrl;
+// mem.imageUrl = cats[0];
+// console.log(mem);
+
+// const memRef = doc(db, "memory", imageId);
+
+// await updateDoc(targetMems[0], mem);
+
+// q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(500));
+// q = query(collection(db, 'memory'), where('userId', '==', 'xQdHrPyQIIWaf8ismq0d3CZYZ992'), orderBy('timestamp', 'desc'), limit(100));
+// q = query(collection(db, 'reviews'), orderBy('timestamp', 'desc'), limit(volume));
+// q = query(collection(db, 'users'), orderBy('timestamp', 'desc'), limit(volume));
+// q = query(collection(db, 'reviews'), limit(volume));
+
+// await setDoc(doc(db, "reviews", "demo-LA"), {
+  //   name: "Los Angeles",
+  //   state: "CA",
+  //   country: "USA"
+  // });
+  // let a = doc(db, 'reviews', 'alovelace');
+
+let memoryData = [];
 let memoryElements = [];
-allDocuments.forEach(data => {
+
+let sq = query(collection(db, 'memory'), where('imageId', '==', imageId), limit(1));
+// let sq = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(10));
+
+(await getDocs(sq)).forEach((doc) => {
+  let data = doc.data();
+  memoryData.push(data);
+  console.log(data);
+
   let memory = document.createElement('div');
   memory.className = 'memory';
 
   let img = document.createElement('img');
   img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
+  img.setAttribute('data-imageId', data.imageId);
   memory.appendChild(img);
-
-  let text = document.createElement('p');
-  let type;
-  switch (data.type) {
-    case 'Uploaded': type = 'U'; break;
-    case 'Saved': type = 'S'; break;
-    default: type = '?'; console.warn('Unrecognized memory type', data); break;
-  }
-  text.innerHTML = `
-  <span class="userId float-l">${fm(data.userId)}</span>
-  <span class="type float-r">${type}</span>
-  <br>
-  <span class="country">${data.country}</span>
-  `;
-  memory.appendChild(text);
 
   memoryElements.push(memory);
 });
@@ -71,6 +93,6 @@ let main = $('#memory-container');
 memoryElements.forEach(element => {
   main.appendChild(element);
 });
+
+window.memoryData = memoryData;
 window.memoryElements = memoryElements;
-console.log('DBG: Displayed memories');
-document.dispatchEvent(new Event('x-memories-ready'));
