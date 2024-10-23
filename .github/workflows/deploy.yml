@@ -15,6 +15,8 @@ jobs:
         run: |
           cp src/*.html public/
           cp src/*.js public/
+          cp src/*.mjs public/
+          cp src/*.css public/
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
