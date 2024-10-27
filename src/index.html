@@ -15,31 +15,15 @@
     </header>
     <main>
         <form id="review-request-form">
-            <label for="user">User:</label>
             <input type="text" id="user" name="user" placeholder="User ID or URL" required>
             <br>
 
-            <label for="last-memory">Last reviewed memory:</label>
-            <input type="text" id="last-memory" name="last-memory" placeholder="Memory ID or URL">
+            <input type="text" id="last-memory" name="last-memory" placeholder="Memory ID or URL" style="display: none;">
             <br>
 
             <button type="submit">Submit</button>
         </form>
     </main>
-    <!-- input reviewee name -->
-    <!-- if no reviewee in database, ask for last memory (id or link) -->
-        <!-- query collection 'reviews' where userId = reviewee username or = last 6 chars, orderBy endTimestamp, limit 1 -->
-        <!-- if a result is found -->
-            <!-- get pics from endTimestamp until today (where time > endMemoryTime) -->
-        <!-- if no result is found -->
-            <!-- prompt for memoryId or link -->
-            <!-- if link, extract the memoryId -->
-            <!-- query collection 'memories' where memoryId = memoryId, limit 1 -->
-            <!-- if no results, prompt again -->
-            <!-- if one result, get pics from lastMemory.timestamp until today -->
-        <!-- display pics -->
-        <!-- review submit button -->
-        <!-- 1 field for comment -->
 </body>
 
 </html>

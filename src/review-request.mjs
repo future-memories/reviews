@@ -85,18 +85,41 @@ let getMemory = async (memoryId) => {
     (isWarning ? console.warn : console.error)(`X-Error[getMemory]: ${message}`);
     return null;
   }
-}
+};
 
-// document.addEventListener("DOMContentLoaded", (_event) => {
-// });
+let onSubmit = async (e) => {
+  e.preventDefault(); // prevent default form behavior
+  let quit = (msg) => { alert(msg); return false };
+  let redirect = (userId, timestamp) => window.location.href = `review?userId=${userId}&since=${timestamp.seconds}`;
 
-let userId = parseUserId("https://explorer.futurememory.app/user/71nxIAj6SKeYBBTv7wiKYh03ap62");
-let review = await getLastReview(userId);
-console.log("review", review);
-let memoryId = parseMemoryId("uMaImW1aDuroALTgIOBU");
-let mem = await getMemory(memoryId);
-console.log("mem", mem);
+  let userId = parseUserId($("#user").value);
+  if (userId == null) return quit("Invalid user ID");
 
+  let review = await getLastReview(userId);
+  if (review != null) return redirect(userId, review.timestamp);
+
+  let inputLastMemory = $("#last-memory").value;
+  if (inputLastMemory == "") {
+    $('#last-memory').style.display = 'block';
+    return quit("No reviews found for this user. Please input last reviewed memory (as URL or ID) and resubmit.");
+  }
+
+  if (inputLastMemory == "ALL") return redirect(userId, {seconds: 0});
+
+  let memoryId = parseMemoryId(inputLastMemory);
+  if (memoryId == null) return quit("Invalid memory ID");
+
+  let lastMemory = await getMemory(memoryId);
+  if (lastMemory == null) return quit("Memory not found");
+  if (lastMemory.type != "Uploaded") return quit("Memory is not of type 'Uploaded'");
+  if (lastMemory.creatorId != userId) return quit("Memory does not belong to the user");
+
+  return redirect(userId, lastMemory.timestamp);
+};
+
+document.addEventListener("DOMContentLoaded", (_event) => {
+  $("#review-request-form").addEventListener("submit", onSubmit);
+});
 
 let tests = () => {
   console.assert(parseUserId("random") === null, "Test 1 failed");
