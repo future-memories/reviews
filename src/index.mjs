@@ -2,8 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
-// let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
-// const url = new URLSearchParams(new URL(window.location.href).search);
 
 const fmDB = getFirestore(initializeApp({
   projectId: "patr-3a75e",
@@ -90,7 +88,7 @@ let getMemory = async (memoryId) => {
 let onSubmit = async (e) => {
   e.preventDefault(); // prevent default form behavior
   let quit = (msg) => { alert(msg); return false };
-  let redirect = (userId, timestamp) => window.location.href = `review?userId=${userId}&since=${timestamp.seconds}`;
+  let redirect = (userId, timestamp) => window.location.href = `review.html?userId=${userId}&since=${timestamp.seconds}`;
 
   let userId = parseUserId($("#user").value);
   if (userId == null) return quit("Invalid user ID");
