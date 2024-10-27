@@ -28,14 +28,23 @@ if (url.has('userId')) {
   let userId = url.get('userId');
   // let userId = '71nxIAj6SKeYBBTv7wiKYh03ap62';
   q = query(collection(db, 'memory'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(volume));
+  // q = query(collection(db, 'memory'), where('userId', '==', userId), orderBy('timestamp', 'desc'));
 } else {
+  // q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
   q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'), limit(volume));
 }
 
 let allDocuments = [];
-(await getDocs(q)).forEach((doc) => {
-  allDocuments.push(doc.data());
-});
+try {
+  let querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    allDocuments.push(doc.data());
+  });
+} catch (error) {
+  console.error("Error fetching projects:", error);
+  throw new Error("Could not fetch projects");
+}
+
 console.log('DBG: Queried documents');
 console.log(allDocuments[0]);
 window.memoryData = allDocuments;

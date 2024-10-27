@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <title>DEMO: FM Reviews</title>
+    <script defer src="load-images.mjs" type="module"></script>
+    <script defer src="controls.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>FM Reviews</h1>
+    </header>
+    <main>
+        <section id="current">
+            <img id="current-memory" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
+            <div id="status">
+                <h3>Status</h3>
+                <div class="flex">
+                    <table id="status-table">
+                        <tr>
+                            <th>Status</th>
+                            <td id="curr-status">TBD</td>
+                        </tr>
+                        <tr>
+                            <th>User ID</th>
+                            <td id="curr-user-id">FMXXXXXX</td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td id="curr-date">YYYY-MM-DD</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td id="curr-location">City, Country</td>
+                        </tr>
+                        <tr>
+                            <th>Tag 1</th>
+                            <td id="curr-tag1">Tag 1</td>
+                        </tr>
+                        <tr>
+                            <th>Tag 2</th>
+                            <td id="curr-tag2">Tag 2</td>
+                        </tr>
+                        <tr>
+                            <th>Tag 3</th>
+                            <td id="curr-tag3">Tag 3</td>
+                        </tr>
+                    </table>
+                    <div id="status-review">
+                        <p id="status-counter">X / Y reviewed</p>
+                        <!-- <p id="status-money">$XX.XX</p> -->
+                        <p id="review-recipient">FMXXXXXX</p>
+                        <p id="review-date-range">YYYY-MM-DD to YYYY-MM-DD</p>
+                    </div>
+                </div>
+            </div>
+            <div id="controls">
+                <h3>Controls</h3>
+                <ul>
+                    <li>
+                        A or <button id="btn-bad">Bad</button>
+                    </li>
+                    <li>
+                        S or <button id="btn-okay">Okay</button>
+                    </li>
+                    <li>
+                        D or <button id="btn-good">Good</button>
+                    </li>
+                    <li>
+                        P or <button id="btn-special">Mark special</button>
+                    </li>
+                    <li>
+                        F or <button id="btn-skip">Skip</button>
+                    </li>
+                    <li>
+                        Q or <button id="btn-prev">Go to previous</button>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <section id="memory-container"></section>
+    </main>
+</body>
+
+</html>
