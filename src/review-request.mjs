@@ -34,6 +34,70 @@ let parseUserId = (input) => {
   return res?.groups?.userId ?? null;
 };
 
+let parseMemoryId = (input) => {
+  input = input.trim();
+  let urlRe = new RegExp("^https:\/\/explorer\.futurememory\.app\/memory\/(?<memoryId>[a-zA-Z0-9]{20})");
+  let idRe = new RegExp("^(?<memoryId>[a-zA-Z0-9]{20})$");
+
+  let res = input.match(urlRe) ?? input.match(idRe);
+  return res?.groups?.memoryId ?? null;
+};
+
+let getLastReview = async (userId) => {
+  try {
+    let q = query(collection(reviewDB, 'reviews'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(1));
+
+    let results = [];
+    (await getDocs(q)).forEach((doc) => {
+      results.push(doc.data());
+    });
+
+    if (results.length === 1) {
+      return results[0];
+    } else {
+      throw new Error(`[W]No memories found for user "${userId}"`);
+    }
+  } catch (error) {
+    let isWarning = error.message.startsWith("[W]");
+    let message = isWarning ? error.message.substring(3) : error.message;
+    (isWarning ? console.warn : console.error)(`X-Error[getLastReview]: ${message}`);
+    return null;
+  }
+};
+
+let getMemory = async (memoryId) => {
+  try {
+    let q = query(collection(fmDB, 'memory'), where('imageId', '==', memoryId), limit(1));
+
+    let results = [];
+    (await getDocs(q)).forEach((doc) => {
+      results.push(doc.data());
+    });
+
+    if (results.length === 1) {
+      return results[0];
+    } else {
+      throw new Error(`[W]Memory not found. memoryId = "${memoryId}"`);
+    }
+  } catch (error) {
+    let isWarning = error.message.startsWith("[W]");
+    let message = isWarning ? error.message.substring(3) : error.message;
+    (isWarning ? console.warn : console.error)(`X-Error[getMemory]: ${message}`);
+    return null;
+  }
+}
+
+// document.addEventListener("DOMContentLoaded", (_event) => {
+// });
+
+let userId = parseUserId("https://explorer.futurememory.app/user/71nxIAj6SKeYBBTv7wiKYh03ap62");
+let review = await getLastReview(userId);
+console.log("review", review);
+let memoryId = parseMemoryId("uMaImW1aDuroALTgIOBU");
+let mem = await getMemory(memoryId);
+console.log("mem", mem);
+
+
 let tests = () => {
   console.assert(parseUserId("random") === null, "Test 1 failed");
   console.assert(parseUserId("https://explorer.futurememory.app/user/71nxIAj6SKeYBBTv7wiKYh03ap62") === "71nxIAj6SKeYBBTv7wiKYh03ap62", "Test 2 failed");
@@ -41,24 +105,8 @@ let tests = () => {
   console.assert(parseUserId("  https://explorer.futurememory.app/user/71nxIAj6SKeYBBTv7wiKYh03ap62/  ") === "71nxIAj6SKeYBBTv7wiKYh03ap62", "Test 4 failed");
   console.assert(parseUserId("cgEEM9ZNv1etWS3CYkZUiiSHEMl1") === "cgEEM9ZNv1etWS3CYkZUiiSHEMl1", "Test 5 failed");
   console.assert(parseUserId("  cgEEM9ZNv1etWS3CYkZUiiSHEMl1/") === "cgEEM9ZNv1etWS3CYkZUiiSHEMl1", "Test 6 failed");
+  console.assert(parseMemoryId("https://explorer.futurememory.app/memory/uMaImW1aDuroALTgIOBU/associations") === "uMaImW1aDuroALTgIOBU", "Test 7 failed");
+  console.assert(parseMemoryId("uMaImW1aDuroALTgIOBU") === "uMaImW1aDuroALTgIOBU", "Test 8 failed");
+  console.assert(parseMemoryId("uMaImW1aDuroALTgIOBU  ") === "uMaImW1aDuroALTgIOBU", "Test 9 failed");
 };
 tests();
-
-let getLastReviewedMemory = (userId) => {
-
-};
-
-try {
-  let q = query(collection(fmDB, 'users'), limit(10));
-  let users = [];
-  let querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    users.push(doc.data());
-  });
-  console.log(users);
-} catch (error) {
-  console.error("X-Error: ", error);
-}
-
-// document.addEventListener("DOMContentLoaded", (_event) => {
-// });
