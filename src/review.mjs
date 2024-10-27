@@ -21,7 +21,7 @@ if (userId == null) {
   throw new Error('Required URL parameter `userId` is missing');
 }
 
-let lastReviewedMemoryTimestamp = url.get('since');
+let lastReviewedMemoryTimestamp = url.get('since'); // in seconds
 if (lastReviewedMemoryTimestamp == null) {
   alert('Required URL parameter `since` is missing');
   throw new Error('Required URL parameter `since` is missing');
@@ -60,15 +60,8 @@ memoryData.forEach(data => {
   memory.appendChild(img);
 
   let text = document.createElement('p');
-  let type;
-  switch (data.type) {
-    case 'Uploaded': type = 'U'; break;
-    case 'Saved': type = 'S'; break;
-    default: type = '?'; console.warn('Unrecognized memory type', data); break;
-  }
   text.innerHTML = `
   <span class="userId float-l">${fm(data.userId)}</span>
-  <span class="type float-r">${type}</span>
   <br>
   <span class="country">${data.country}</span>
   `;
