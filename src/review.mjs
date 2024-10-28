@@ -45,7 +45,7 @@ let getMemories = async () => {
       where('userId', '==', userId),
       where('timestamp', '>', new Date(lastReviewedMemoryTimestamp * 1000)),
       orderBy('timestamp', 'desc'),
-      limit(100)
+      // limit(100),
     );
     (await getDocs(q)).forEach((doc) => {
       let data = doc.data(); // client-side filtering, due to no index for type
@@ -56,6 +56,10 @@ let getMemories = async () => {
   } catch (error) {
     console.error("X-Error:", error);
     throw error;
+  }
+  if (memoryData.length == 0) {
+    alert('No new memories to review');
+    throw new Error('No new memories to review');
   }
   console.log('mem[0]', memoryData[0]);
   return memoryData;
@@ -88,7 +92,12 @@ window.reviewState = {
   total: window.memoryData.length,
   data: window.memoryData.map(_ => ({ status: 'pending' })),
   submitted: false,
-  reviewId: `${url.get('userId')}-${url.get('since')}-${window.memoryData[window.memoryData.length - 1].timestamp.seconds}`,
+  reviewId: (() => {
+    let userId = url.get('userId');
+    let startSeconds = window.memoryData[window.memoryData.length - 1].timestamp.seconds;
+    let endSeconds = window.memoryData[0].timestamp.seconds;
+    return `${userId}-${startSeconds}-${endSeconds}`
+  })(),
   moveIndexBy(delta) {
     this.index = (this.index + delta + this.total) % this.total;
   },
@@ -138,6 +147,12 @@ let onSubmit = async (e) => {
       "task": data.filter(d => d == statusMap["task"]).length,
       "not-eligible-for-task": data.filter(d => d == statusMap["fail"]).length,
     },
+    displayName: (() => {
+      let fullDate = (new Date()).toISOString().split('T')[0];
+      let eligible = data.filter(d => d == statusMap["good"]).length;
+      let total = window.reviewState.total;
+      return `${fm(userId)}_Review_${fullDate}_${eligible}_${total}`;
+    })(),
   };
 
   // upload to firebase

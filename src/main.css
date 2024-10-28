@@ -6,7 +6,7 @@
 }
 
 /* ============ GENERIC ============ */
-div.flex { display: flex; flex-direction: row; gap: 1rem; }
+.flex { display: flex; flex-direction: row; gap: 1rem; }
 .float-l { float: left; }
 .float-r { float: right; }
 table {
