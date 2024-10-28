@@ -151,7 +151,7 @@ let onSubmit = async (e) => {
       let fullDate = (new Date()).toISOString().split('T')[0];
       let eligible = data.filter(d => d == statusMap["good"]).length;
       let total = window.reviewState.total;
-      return `${fm(userId)}_Review_${fullDate}_${eligible}_${total}`;
+      return `${fm(userId)}_Review_${fullDate}_${eligible}P_${total}`;
     })(),
   };
 
