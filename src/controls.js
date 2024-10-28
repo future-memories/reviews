@@ -31,6 +31,7 @@ document.addEventListener('x-memories-ready', () => {
 });
 
 let controlListener = (event) => {
+  if (document.activeElement === $('#comment')) return;
   // console.log('DBG: Key pressed: ', event);
   switch (event.key) {
     case 'ArrowLeft': controlPrev(); break;
