@@ -15,49 +15,50 @@ const fmDB = getFirestore(initializeApp({
   measurementId: "G-Y2ZJ3SMS32"
 }, "fm"));
 
-let userId = url.get('userId');
-if (userId == null) {
-  alert('Required URL parameter `userId` is missing');
-  throw new Error('Required URL parameter `userId` is missing');
-}
 
-let lastReviewedMemoryTimestamp = url.get('since'); // in seconds
-if (lastReviewedMemoryTimestamp == null) {
-  alert('Required URL parameter `since` is missing');
-  throw new Error('Required URL parameter `since` is missing');
-}
+let getMemories = async () => {
+  let userId = url.get('userId');
+  if (userId == null) {
+    alert('Required URL parameter `userId` is missing');
+    throw new Error('Required URL parameter `userId` is missing');
+  }
 
-let memoryData = [];
-try {
-  let q = query(
-    collection(fmDB, 'memory'),
-    where('userId', '==', userId),
-    where('timestamp', '>', new Date(lastReviewedMemoryTimestamp * 1000)),
-    orderBy('timestamp', 'desc'),
-    limit(100)
-  );
-  (await getDocs(q)).forEach((doc) => {
-    let data = doc.data(); // client-side filtering, due to no index for type
-    if (data.type == 'Uploaded') {
-      memoryData.push(data);
-    }
-  });
-} catch (error) {
-  console.error("X-Error:", error);
-  throw error;
-}
-window.memoryData = memoryData;
+  let lastReviewedMemoryTimestamp = url.get('since'); // in seconds
+  if (lastReviewedMemoryTimestamp == null) {
+    alert('Required URL parameter `since` is missing');
+    throw new Error('Required URL parameter `since` is missing');
+  }
 
-console.log('mem[0]', memoryData[0]);
+  let memoryData = [];
+  try {
+    let q = query(
+      collection(fmDB, 'memory'),
+      where('userId', '==', userId),
+      where('timestamp', '>', new Date(lastReviewedMemoryTimestamp * 1000)),
+      orderBy('timestamp', 'desc'),
+      limit(100)
+    );
+    (await getDocs(q)).forEach((doc) => {
+      let data = doc.data(); // client-side filtering, due to no index for type
+      if (data.type == 'Uploaded') {
+        memoryData.push(data);
+      }
+    });
+  } catch (error) {
+    console.error("X-Error:", error);
+    throw error;
+  }
+  console.log('mem[0]', memoryData[0]);
+  return memoryData;
+};
 
-let memoryElements = [];
-memoryData.forEach(data => {
-  let memory = document.createElement('div');
-  memory.className = 'memory';
+let createMemoryCard = (data) => {
+  let card = document.createElement('div');
+  card.className = 'card';
 
   let img = document.createElement('img');
   img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
-  memory.appendChild(img);
+  card.appendChild(img);
 
   let text = document.createElement('p');
   text.innerHTML = `
@@ -65,15 +66,46 @@ memoryData.forEach(data => {
   <br>
   <span class="country">${data.country}</span>
   `;
-  memory.appendChild(text);
+  card.appendChild(text);
 
-  memoryElements.push(memory);
-});
-window.memoryElements = memoryElements;
+  return card;
+};
 
-let main = $('#memory-container');
-memoryElements.forEach(element => {
-  main.appendChild(element);
-});
+window.memoryData = await getMemories();
+window.memoryCards = window.memoryData.map(data => createMemoryCard(data));
+window.reviewState = {
+  index: 0,
+  reviewed: 0,
+  total: window.memoryData.length,
+  data: window.memoryData.map(_ => ({ status: 'pending' })),
+  moveIndexBy(delta) {
+    this.index = (this.index + delta + this.total) % this.total;
+  },
+  getPercentageReviewed() {
+    let percentage = Math.round(this.reviewed / this.total * 100 * 100) / 100;
+    return isNaN(percentage) ? 0 : percentage;
+  },
+  getStatus() { return this.data[this.index].status },
+  setStatus(status) {
+    this.reviewed += this.getStatus() == 'pending' ? 1 : 0;
+    this.data[this.index].status = status;
+    this.getMemoryCard().querySelector('img').className = status;
+  },
+  getMemory() { return window.memoryData[this.index] },
+  getMemoryCard() { return window.memoryCards[this.index] },
+};
 
-document.dispatchEvent(new Event('x-memories-ready'));
+let onLoad = (_event) => {
+  console.log('[EVENT] DOMContentLoaded');
+  let main = $('main');
+  window.memoryCards.forEach(card => {
+    main.appendChild(card);
+  });
+  document.dispatchEvent(new Event('x-memories-ready'));
+}
+
+if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
+  onLoad();
+} else {
+  document.addEventListener("DOMContentLoaded", onLoad);
+}

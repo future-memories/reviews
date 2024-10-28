@@ -2,8 +2,8 @@
 :root {
     --card-width: 100px;
     --border: 4px;
+    font-family: monospace;
 }
-main { font-family: monospace; }
 
 /* ============ GENERIC ============ */
 div.flex { display: flex; flex-direction: row; gap: 1rem; }
@@ -20,8 +20,8 @@ table td {
     border: 1px solid silver;
 }
 
-.memory { width: var(--card-width); }
-.memory > img {
+.card { width: var(--card-width); }
+.card > img {
     --w: calc(var(--card-width) - 2 * var(--border));
     width: var(--w);
     height: calc(1.5 * var(--w));
@@ -29,5 +29,5 @@ table td {
     object-fit: cover;
     border: var(--border) solid silver;
 }
-.memory > p { margin-block: 0; }
-.memory > p span.userId { font-weight: bold; }
+.card > p { margin-block: 0; }
+.card > p span.userId { font-weight: bold; }

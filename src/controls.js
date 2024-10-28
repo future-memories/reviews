@@ -1,136 +1,82 @@
 let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
-const url = new URLSearchParams(new URL(window.location.href).search);
-
-var reviewed = 0, index = 0, total = 0;
-var reviewData = [];
 
 document.addEventListener('x-memories-ready', () => {
-  total = window.memoryData.length;
-  window.memoryData.forEach(_ => {
-    reviewData.push({ status: 'pending' });
-  });
-  for (let i = 0; i < window.memoryElements.length; i++) {
-    window.memoryElements[i].addEventListener('click', () => {
+  console.log('[EVENT] x-memories-ready');
+  for (let i = 0; i < window.memoryCards.length; i++) {
+    window.memoryCards[i].addEventListener('click', () => {
       index = i;
-      updateStatusFields();
+      waitUpdate();
     });
   }
+  update();
 
-  updateStatusFields();
-  document.addEventListener('keyup', controlListener);
-  $('#btn-bad').addEventListener('click', controlBad);
-  $('#btn-okay').addEventListener('click', controlOkay);
-  $('#btn-good').addEventListener('click', controlGood);
-  $('#btn-skip').addEventListener('click', controlSkip);
-  $('#btn-special').addEventListener('click', controlSpecial);
   $('#btn-prev').addEventListener('click', controlPrev);
+  $('#btn-skip').addEventListener('click', controlSkip);
+  $('#btn-good').addEventListener('click', controlGood);
+  $('#btn-bad').addEventListener('click', controlBad);
+  $('#btn-task').addEventListener('click', controlTask);
+  $('#btn-fail').addEventListener('click', controlFail);
+  document.addEventListener('keyup', controlListener);
+
+  $('#review-recipient').innerText = fm(window.reviewState.getMemory().userId);
+  let minSeconds = window.memoryData[0].timestamp.seconds, maxSeconds = 0;
+  window.memoryData.forEach(data => {
+    minSeconds = Math.min(minSeconds, data.timestamp.seconds);
+    maxSeconds = Math.max(maxSeconds, data.timestamp.seconds);
+  });
+  let minDate = new Date(minSeconds * 1000).toISOString().split('T')[0];
+  let maxDate = new Date(maxSeconds * 1000).toISOString().split('T')[0];
+  $('#review-date-range').innerText = `${minDate} to ${maxDate}`;
 });
 
 let controlListener = (event) => {
-  console.log('DBG: Key pressed: ', event);
+  // console.log('DBG: Key pressed: ', event);
   switch (event.key) {
-    case 'a': controlBad(); break;
-    case 's': controlOkay(); break;
-    case 'd': controlGood(); break;
-    case 'f': controlSkip(); break;
-    case 'p': controlSpecial(); break;
-    case 'q': controlPrev(); break;
-    default:
-      break;
+    case 'ArrowLeft': controlPrev(); break;
+    case 'ArrowRight': controlSkip(); break;
+    case 'a': controlGood(); break;
+    case 's': controlBad(); break;
+    case 'd': controlTask(); break;
+    case 'f': controlFail(); break;
+    default: break;
   }
 }
 
-let controlBad = () => {
-  setStatus('bad');
-  index = index + 1 >= total ? 0 : index + 1;
-  waitUpdateStatusFields();
-}
+let controlSkip = () => { window.reviewState.moveIndexBy(1); update(); }
+let controlPrev = () => { window.reviewState.moveIndexBy(-1); update(); }
+let controlGood = () => { window.reviewState.setStatus("good"); window.reviewState.moveIndexBy(1); waitUpdate(); }
+let controlBad = () => { window.reviewState.setStatus("bad"); window.reviewState.moveIndexBy(1); waitUpdate(); }
+let controlTask = () => { window.reviewState.setStatus("task"); window.reviewState.moveIndexBy(1); waitUpdate(); }
+let controlFail = () => { window.reviewState.setStatus("fail"); window.reviewState.moveIndexBy(1); waitUpdate(); }
 
-let controlOkay = () => {
-  setStatus('okay');
-  index = index + 1 >= total ? 0 : index + 1;
-  waitUpdateStatusFields();
-}
+let waitUpdate = () => setTimeout(update, 100);
+let update = () => {
+  $('#status-counter').innerText = `${window.reviewState.reviewed} / ${window.reviewState.total} reviewed (${window.reviewState.getPercentageReviewed()}%)`;
 
-let controlGood = () => {
-  setStatus('good');
-  index = index + 1 >= total ? 0 : index + 1;
-  waitUpdateStatusFields();
+  // if 100%, show the submit review button
+  // if review is submitted, show print button (or enable it)
+
+  updateCurrentMemory();
 };
 
-let controlSpecial = () => {
-  setStatus('special');
-}
+let updateCurrentMemory = () => {
+  let data = window.reviewState.getMemory();
+  let status = window.reviewState.getStatus();
 
-let controlSkip = () => {
-  index = index + 1 >= total ? 0 : index + 1;
-  updateStatusFields();
-}
+  $('#current-memory img').src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
+  $('#current-memory img').className = status;
 
-let controlPrev = () => {
-  index = index == 0 ? total - 1 : index - 1;
-  updateStatusFields();
-}
-
-let setStatus = (status) => {
-  let oldStatus = reviewData[index].status;
-  if ((oldStatus == 'pending' || oldStatus == 'special') && status != 'special') {
-    reviewed += 1;
-  }
-
-  if (oldStatus == 'special') {
-    reviewData[index].status = (status == 'special' ? 'pending' : `special-${status}`);
-  } else if (oldStatus.startsWith('special-')) {
-    reviewData[index].status = (status == 'special' ? oldStatus.substring('special-'.length) : `special-${status}`);
-  } else {
-    reviewData[index].status = (status == 'special' ? `special-${oldStatus}` : status);
-  }
-
-  updateStatusFields();
-}
-
-let waitUpdateStatusFields = () => {
-  setTimeout(updateStatusFields, 100);
-}
-
-let updateStatusFields = () => {
-  console.log('DBG: Updating status fields');
-
-  let data = window.memoryData[index];
   let fullDate = new Date(data.timestamp.seconds * 1000).toISOString();
+  $('#status .date').innerText = fullDate.split('T')[0];
+  $('#status .time').innerText = fullDate.split('T')[1].split('.')[0];
 
-  $('#current-memory').src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
-  $('#curr-status').innerText = `[i = ${index}] ${reviewData[index].status}`;
-  // $('#curr-user-id').innerText = fm(data.userId);
-  // $('#curr-user-id').innerText = data.userId;
-  $('#curr-user-id').innerHTML = `<a href="/?userId=${data.userId}">${data.userId}</a>`;
-  $('#curr-date').innerText = fullDate.split('T')[0];
-  // $('#curr-time').innerText = fullDate.split('T')[1].split('.')[0];
-  $('#curr-location').innerText = `${data.city}, ${data.country}`;
+  $('#status .status').innerText = `[i = ${window.reviewState.index}] ${status}`;
+  $('#status .location').innerText = `${data.city}, ${data.country}`;
+  $('#status .type').innerText = `${data.type}`;
+
   for (let i = 0; i < 3 && i < data.tags.length; i++)
-    $(`#curr-tag${i + 1}`).innerText = `[w = ${data.tags[i].weight}] ${data.tags[i].keyword.toLowerCase()}`;
+    $(`#status .tag${i + 1}`).innerText = `[w = ${data.tags[i].weight}] ${data.tags[i].keyword.toLowerCase()}`;
   for (let i = data.tags.length; i < 3; i++)
-    $(`#curr-tag${i + 1}`).innerText = "[w = ?] N/A";
-
-  let percentage = Math.round(reviewed / total * 100 * 100) / 100;
-  if (isNaN(percentage)) percentage = 0;
-  $('#status-counter').innerText = `${reviewed} / ${total} reviewed (${percentage}%)`;
-
-  $('#current-memory').className = reviewData[index].status;
-  window.memoryElements[index].querySelector('img').className = reviewData[index].status;
-
-  // only on first load.. basically
-  if (index == 0) {
-    $('#review-recipient').innerText = fm(data.userId);
-
-    let minSeconds = window.memoryData[0].timestamp.seconds, maxSeconds = 0;
-    window.memoryData.forEach(data => {
-      minSeconds = Math.min(minSeconds, data.timestamp.seconds);
-      maxSeconds = Math.max(maxSeconds, data.timestamp.seconds);
-    });
-    let minDate = new Date(minSeconds * 1000).toISOString().split('T')[0];
-    let maxDate = new Date(maxSeconds * 1000).toISOString().split('T')[0];
-    $('#review-date-range').innerText = `${minDate} to ${maxDate}`;
-  }
-};
+    $(`#status .tag${i + 1}`).innerText = "[w = ?] N/A";
+}

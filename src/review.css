@@ -1,29 +1,35 @@
 /* ============ LAYOUT ============ */
-section#memory-container {
+main {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--card-width));
     gap: 1rem 5px; /* row gap, column gap */
 }
 
-section#current {
+header {
     max-width: 140ch;
     margin-inline: auto;
     margin-bottom: 2rem;
 
     display: grid;
-    grid-template-columns: 2fr 3fr;
-    grid-template-rows: 2fr 1fr;
+    grid-template-columns: 1fr 2fr 3fr;
+    grid-template-rows: auto 2fr 1fr;
+    gap: 1rem;
 
-    grid-template-areas: "img status" "img controls";
+    grid-template-areas:
+        "title title title"
+        "img status review"
+        "img controls controls";
 }
-section#current > img#current-memory { grid-area: img; }
-section#current > div#status { grid-area: status; }
-section#current > div#controls { grid-area: controls; }
+header > h1 { grid-area: title; }
+header > #current-memory { grid-area: img; }
+header > #status { grid-area: status; }
+header > #review { grid-area: review; }
+header > #controls { grid-area: controls; }
 
 /* ============ MEMORIES ============ */
-.memory > p span.type { font-weight: bold; color: silver; }
+.card > p span.type { font-weight: bold; color: silver; }
 
-img#current-memory {
+#current-memory > img {
     width: 300px;
     height: 450px;
     object-fit: cover;
@@ -31,14 +37,12 @@ img#current-memory {
     border: var(--border) solid white;
 }
 
-table#status-table th { min-width: 12ch; }
-table#status-table td { min-width: 24ch; }
+#status table th { min-width: 12ch; }
+#status table td { min-width: 24ch; }
 
 /* overrides for img#current-memory */
 img.good { border-color: green !important; }
-img.okay { border-color: yellow !important; }
 img.bad { border-color: red !important; }
-img.special-pending { border-inline-color: blue !important; }
-img.special-good { border-inline-color: blue !important; border-block-color: green !important; }
-img.special-okay { border-inline-color: blue !important; border-block-color: yellow !important; }
-img.special-bad { border-inline-color: blue !important; border-block-color: red !important; }
+img.task { border-color: blue !important; }
+img.fail { border-color: orange !important; }
+img.pending { border-color: silver !important; }
