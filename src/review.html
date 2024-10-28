@@ -20,6 +20,8 @@
             <img
                 src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
             <!-- buttons for left & right -->
+            <button id="btn-prev" class="float-l">< Previous</button>
+            <button id="btn-skip" class="float-r">Next ></button>
         </section>
 
         <section id="status">
@@ -72,7 +74,12 @@
                 <p id="review-recipient">FMXXXXXX</p>
                 <p id="review-date-range">YYYY-MM-DD to YYYY-MM-DD</p>
             </div>
-            <textarea id="comment" placeholder="Comment"></textarea>
+            <form>
+                <textarea id="comment" placeholder="Comment"></textarea>
+                <button type="submit" disabled>Submit</button>
+            </form>
+            <hr>
+            <button id="btn-print" disabled>Print</button>
         </section>
 
         <section id="controls">
@@ -89,12 +96,6 @@
                 </li>
                 <li>
                     F or <button id="btn-fail">Not eligible for task</button>
-                </li>
-                <li>
-                    < or <button id="btn-prev">Go to previous</button>
-                </li>
-                <li>
-                    > or <button id="btn-skip">Skip</button>
                 </li>
             </ul>
         </section>

@@ -7,8 +7,8 @@
 
 /* ============ GENERIC ============ */
 div.flex { display: flex; flex-direction: row; gap: 1rem; }
-span.float-l { float: left; }
-span.float-r { float: right; }
+.float-l { float: left; }
+.float-r { float: right; }
 table {
     border-collapse: collapse;
     border: 1px solid silver;

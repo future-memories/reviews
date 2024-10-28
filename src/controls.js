@@ -56,7 +56,14 @@ let update = () => {
   $('#status-counter').innerText = `${window.reviewState.reviewed} / ${window.reviewState.total} reviewed (${window.reviewState.getPercentageReviewed()}%)`;
 
   // if 100%, show the submit review button
+  if (window.reviewState.reviewed == window.reviewState.total) {
+    $('#review > form > button[type="submit"]').disabled = false;
+  }
   // if review is submitted, show print button (or enable it)
+  if (window.reviewState.submitted) {
+    $('#review > form > button[type="submit"]').disabled = true;
+    $('button#btn-print').disabled = false;
+  }
 
   updateCurrentMemory();
 };

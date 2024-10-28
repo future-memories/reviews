@@ -14,3 +14,4 @@ User Display name is `FM` + last 6 chars from user_id uppercased:
 1. we need to remove saved images on the frontend as querying for
   `where('type', '==', 'Uploaded')` requires an index on the prod database.
 
+<!-- https://firebase.google.com/docs/firestore/manage-data/add-data -->

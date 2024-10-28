@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, setDoc, doc, collection, query, where, orderBy, limit, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
@@ -15,6 +15,15 @@ const fmDB = getFirestore(initializeApp({
   measurementId: "G-Y2ZJ3SMS32"
 }, "fm"));
 
+const reviewDB = getFirestore(initializeApp({
+  projectId: "id-fm-reviews",
+  appId: "1:139765414634:web:34544f92eeb915b3f27593",
+  apiKey: "AIzaSyCSaGPsgk4PiNAL2bp0h_lq6VDBdOFdAWM",
+  authDomain: "id-fm-reviews.firebaseapp.com",
+  storageBucket: "id-fm-reviews.appspot.com",
+  messagingSenderId: "139765414634",
+  measurementId: "G-DN5NWXVX7N"
+}, "fm-reviews"));
 
 let getMemories = async () => {
   let userId = url.get('userId');
@@ -78,6 +87,8 @@ window.reviewState = {
   reviewed: 0,
   total: window.memoryData.length,
   data: window.memoryData.map(_ => ({ status: 'pending' })),
+  submitted: false,
+  reviewId: `${url.get('userId')}-${url.get('since')}-${window.memoryData[window.memoryData.length - 1].timestamp.seconds}`,
   moveIndexBy(delta) {
     this.index = (this.index + delta + this.total) % this.total;
   },
@@ -95,6 +106,52 @@ window.reviewState = {
   getMemoryCard() { return window.memoryCards[this.index] },
 };
 
+// submitting a review
+let onSubmit = async (e) => {
+  e.preventDefault(); // prevent default form behavior
+  let quit = (msg) => { alert(msg); return false };
+
+  if (window.reviewState.reviewed < window.reviewState.total) {
+    return quit('Please review all images before submitting');
+  }
+
+  let statusMap = {
+    'pending': 0,
+    'good': 1,
+    'bad': 2,
+    'task': 3,
+    'fail': 4,
+  };
+  let data = window.reviewState.data.map(d => statusMap[d.status]);
+  let userId = url.get('userId');
+
+  let review = {
+    userId: userId,
+    timestamp: Timestamp.now(),
+    data: data,
+    comment: $("#comment").value,
+    total: window.reviewState.total,
+    reviewSummary: {
+      "total": window.reviewState.total,
+      "eligible": data.filter(d => d == statusMap["good"]).length,
+      "not-eligible": data.filter(d => d == statusMap["bad"]).length,
+      "task": data.filter(d => d == statusMap["task"]).length,
+      "not-eligible-for-task": data.filter(d => d == statusMap["fail"]).length,
+    },
+  };
+
+  // upload to firebase
+  try {
+    await setDoc(doc(reviewDB, "reviews", window.reviewState.reviewId), review);
+    window.reviewState.submitted = true;
+    update(); // hacky (should be in controls.js ??)
+    alert('Review submitted successfully');
+  } catch (error) {
+    console.error("X-Error:", error);
+    alert(`Failed to submit review: "${error}"`);
+  }
+};
+
 let onLoad = (_event) => {
   console.log('[EVENT] DOMContentLoaded');
   let main = $('main');
@@ -102,6 +159,12 @@ let onLoad = (_event) => {
     main.appendChild(card);
   });
   document.dispatchEvent(new Event('x-memories-ready'));
+
+  $('#review > form').addEventListener('submit', onSubmit);
+
+  $('button#btn-print').addEventListener('click', (_event) => {
+    window.location.href=`print.html?reviewId=${window.reviewState.reviewId}`;
+  });
 }
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
