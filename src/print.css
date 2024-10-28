@@ -1,3 +1,8 @@
+body {
+    background-color: black;
+    color: white;
+}
+
 header {
     max-width: 140ch;
     margin-inline: auto;
@@ -15,9 +20,11 @@ header > #review { grid-area: review; }
 header > #summary { grid-area: summary; }
 
 main {
+    --card-width: 85px;
+    --border: 3px;
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--card-width));
-    gap: 1rem 5px; /* row gap, column gap */
+    gap: 2px 2px; /* row gap, column gap */
 }
 
 footer {
