@@ -5,7 +5,7 @@ document.addEventListener('x-memories-ready', () => {
   console.log('[EVENT] x-memories-ready');
   for (let i = 0; i < window.memoryCards.length; i++) {
     window.memoryCards[i].addEventListener('click', () => {
-      index = i;
+      window.reviewState.index = i;
       waitUpdate();
     });
   }
