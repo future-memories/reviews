@@ -26,9 +26,8 @@ table td {
 /* ============ CARD ============ */
 .card { width: var(--card-width); }
 .card > img {
-    --w: calc(var(--card-width) - 2 * var(--border));
-    width: var(--w);
-    height: calc(1.5 * var(--w));
+    width: calc(var(--card-width) - 2 * var(--border));
+    height: calc(1.5 * var(--card-width) - 2 * var(--border));
     object-fit: cover;
     border: var(--border) solid silver;
 }

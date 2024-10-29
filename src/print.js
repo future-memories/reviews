@@ -66,22 +66,9 @@ let getMemories = async (userId, startSeconds, endSeconds) => {
 };
 
 let createMemoryCard = (data) => {
-  let card = document.createElement('div');
-  card.className = 'card';
-
   let img = document.createElement('img');
   img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
-  card.appendChild(img);
-
-  // let text = document.createElement('p');
-  // text.innerHTML = `
-  // <span class="userId float-l">${fm(data.userId)}</span>
-  // <br>
-  // <span class="country">${data.country}</span>
-  // `;
-  // card.appendChild(text);
-
-  return card;
+  return img;
 };
 
 let reviewId = url.get('reviewId');
@@ -113,7 +100,7 @@ let statusReverseMap = {
   4: 'fail',
 };
 for (let i = 0; i < window.memoryCards.length; i++) {
-  window.memoryCards[i].querySelector('img').className = statusReverseMap[window.review.data[i]];
+  window.memoryCards[i].className = statusReverseMap[window.review.data[i]];
 }
 
 
