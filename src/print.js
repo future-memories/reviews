@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, setDoc, doc, collection, query, where, orderBy, limit, getDoc, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, setDoc, and, doc, collection, query, where, orderBy, limit, getDoc, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 const url = new URLSearchParams(new URL(window.location.href).search);
@@ -44,9 +44,11 @@ let getMemories = async (userId, startSeconds, endSeconds) => {
   try {
     let q = query(
       collection(fmDB, 'memory'),
-      where('userId', '==', userId),
-      where('timestamp', '>=', new Date(startSeconds * 1000)),
-      where('timestamp', '<', new Date((endSeconds + 1) * 1000)),
+      and(
+        where('userId', '==', userId),
+        where('timestamp', '>=', new Date(Number(startSeconds) * 1000)),
+        where('timestamp', '<', new Date((Number(endSeconds) + 1) * 1000)),
+      ),
       orderBy('timestamp', 'desc')
     );
     (await getDocs(q)).forEach((doc) => {
