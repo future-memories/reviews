@@ -12,16 +12,19 @@
 </head>
 
 <body>
-    <header>
-        <h1>FM Reviews</h1>
+    <main>
+        <h1 style="text-align: center; margin-block: 0.5rem;">FM Reviews</h1>
 
         <section id="current-memory">
-            <h3>{{ memoryId }}</h3>
             <img
                 src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
             <!-- buttons for left & right -->
-            <button id="btn-prev" class="float-l">< Previous</button>
-            <button id="btn-skip" class="float-r">Next ></button>
+             <div id="memory-nav">
+                <!-- <button id="btn-prev" class="float-l">< Previous</button> -->
+                <button id="btn-prev">< Previous</button>
+                <p id="memory-id">{{ memoryId }}</p>
+                <button id="btn-skip">Next ></button>
+             </div>
         </section>
 
         <section id="status">
@@ -32,53 +35,52 @@
                     <td class="status">TBD</td>
                 </tr>
                 <tr>
-                    <th>User ID</th>
-                    <td class="user-id">FMXXXXXX</td>
-                </tr>
-                <tr>
-                    <th>Date</th>
-                    <td class="date">YYYY-MM-DD</td>
-                </tr>
-                <tr>
                     <th>Time</th>
-                    <td class="time">12:03</td>
-                </tr>
-                <tr>
-                    <th>Type</th>
-                    <td class="type">Uploaded / Saved</td>
+                    <td class="time">YYYY-MM-DD</td>
                 </tr>
                 <tr>
                     <th>Location</th>
                     <td class="location">City, Country</td>
                 </tr>
-                <tr>
+                <tr class="tag1">
                     <th>Tag 1</th>
-                    <td class="tag1">Tag 1</td>
+                    <td>value 1</td>
                 </tr>
-                <tr>
+                <tr class="tag2">
                     <th>Tag 2</th>
-                    <td class="tag2">Tag 2</td>
+                    <td>value 2</td>
                 </tr>
-                <tr>
+                <tr class="tag3">
                     <th>Tag 3</th>
-                    <td class="tag3">Tag 3</td>
+                    <td>value 3</td>
                 </tr>
             </table>
         </section>
 
         <section id="review">
             <h3>Review</h3>
-            <div id="status-review">
-                <p id="status-counter">X / Y reviewed</p>
-                <!-- <p id="status-money">$XX.XX</p> -->
-                <p id="review-recipient">FMXXXXXX</p>
-                <p id="review-date-range">YYYY-MM-DD to YYYY-MM-DD</p>
-            </div>
+            <table>
+                <tr>
+                    <th>Progress</th>
+                    <td class="progress">X / Y reviewed (0%)</td>
+                </tr>
+                <tr>
+                    <th>User</th>
+                    <td class="user">FMAAAAAA</td>
+                </tr>
+                <tr>
+                    <th>Start</th>
+                    <td class="start">TBD</td>
+                </tr>
+                <tr>
+                    <th>End</th>
+                    <td class="end">TBD</td>
+                </tr>
+            </table>
             <form>
                 <textarea id="comment" placeholder="Comment"></textarea>
                 <button type="submit" disabled>Submit</button>
             </form>
-            <hr>
             <button id="btn-print" disabled>Print</button>
         </section>
 
@@ -99,8 +101,10 @@
                 </li>
             </ul>
         </section>
-    </header>
-    <main></main>
+
+        <section id="memories">
+        </section>
+    </main>
 </body>
 
 </html>

@@ -4,11 +4,14 @@
     --border: 4px;
     font-family: monospace;
 }
+html, body { margin: 0; padding: 0; }
 
 /* ============ GENERIC ============ */
 .flex { display: flex; flex-direction: row; gap: 1rem; }
 .float-l { float: left; }
 .float-r { float: right; }
+
+/* ============ TABLE ============ */
 table {
     border-collapse: collapse;
     border: 1px solid silver;
@@ -20,12 +23,12 @@ table td {
     border: 1px solid silver;
 }
 
+/* ============ CARD ============ */
 .card { width: var(--card-width); }
 .card > img {
     --w: calc(var(--card-width) - 2 * var(--border));
     width: var(--w);
     height: calc(1.5 * var(--w));
-
     object-fit: cover;
     border: var(--border) solid silver;
 }

@@ -100,6 +100,7 @@ window.reviewState = {
   })(),
   moveIndexBy(delta) {
     this.index = (this.index + delta + this.total) % this.total;
+    if (this.submitted == false && this.reviewed == this.total && this.index == 0) alert("Review complete!");
   },
   getPercentageReviewed() {
     let percentage = Math.round(this.reviewed / this.total * 100 * 100) / 100;
@@ -169,7 +170,7 @@ let onSubmit = async (e) => {
 
 let onLoad = (_event) => {
   console.log('[EVENT] DOMContentLoaded');
-  let main = $('main');
+  let main = $('#memories');
   window.memoryCards.forEach(card => {
     main.appendChild(card);
   });

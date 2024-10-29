@@ -1,44 +1,70 @@
 /* ============ LAYOUT ============ */
 main {
+    margin: 1rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, var(--card-width));
-    gap: 1rem 5px; /* row gap, column gap */
-}
-
-header {
-    max-width: 140ch;
-    margin-inline: auto;
-    margin-bottom: 2rem;
-
-    display: grid;
-    grid-template-columns: 1fr 2fr 3fr;
-    grid-template-rows: auto 2fr 1fr;
+    grid-template-columns: minmax(275px, auto) 340px 1fr;
+    grid-template-rows: auto auto auto auto;
     gap: 1rem;
 
     grid-template-areas:
-        "title title title"
-        "img status review"
-        "img controls controls";
+        "title    title title"
+        "review   img   memories"
+        "status   img   memories"
+        "controls img   memories";
 }
-header > h1 { grid-area: title; }
-header > #current-memory { grid-area: img; }
-header > #status { grid-area: status; }
-header > #review { grid-area: review; }
-header > #controls { grid-area: controls; }
+main > h1 { grid-area: title; }
+main > #current-memory { grid-area: img; }
+main > #status { grid-area: status; }
+main > #review { grid-area: review; }
+main > #controls { grid-area: controls; }
+main > #memories { grid-area: memories; }
+section > h3 { margin-top: 0; }
 
-/* ============ MEMORIES ============ */
+/* ============ MEMORY CARDS ============ */
+#memories {
+    --card-width: 70px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--card-width));
+    gap: 10px 5px; /* row gap, column gap */
+    justify-content: center;
+
+    overflow-y: scroll;
+    max-height: calc(100vh - 10rem);
+
+    padding-block: 1rem;
+    box-shadow:
+        0 -30px 50px -50px rgba(0, 0, 0, 0.6) inset,
+        0 30px 50px -50px rgba(0, 0, 0, 0.6) inset;
+}
 .card > p span.type { font-weight: bold; color: silver; }
 
 #current-memory > img {
-    width: 300px;
-    height: 450px;
+    width: calc(100% - var(--border) * 2);
+    aspect-ratio: 2 / 3;
     object-fit: cover;
-
-    border: var(--border) solid white;
+    border: var(--border) solid silver;
+}
+#memory-nav {
+    margin-top: calc(var(--border) * 2);
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 2ch;
+}
+#memory-id {
+    text-align: center;
+    color: silver;
+    font-size: 0.9rem;
+    margin-block: auto;
 }
 
-#status table th { min-width: 12ch; }
-#status table td { min-width: 24ch; }
+#status table td { min-width: 20ch; }
+
+#review > form {
+    margin-top: 1.2rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid silver;
+}
 
 /* overrides for img#current-memory */
 img.good { border-color: green !important; }
