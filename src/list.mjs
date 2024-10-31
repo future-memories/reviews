@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getFirestore, collection, query, where, orderBy, limit, doc, getDoc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
+let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 
 const reviewDB = getFirestore(initializeApp({
     projectId: "id-fm-reviews",
@@ -109,12 +110,12 @@ await ensureLoggedIn();
 window.reviews = {};
 window.reviewIds = await getReviewIds();
 window.reviewIds.forEach(reviewId => {
-    let [user, startSeconds, endSeconds] = parseReviewId(reviewId);
-    if (!window.reviews.hasOwnProperty(user)) window.reviews[user] = [];
+    let [userId, startSeconds, endSeconds] = parseReviewId(reviewId);
+    if (!window.reviews.hasOwnProperty(userId)) window.reviews[userId] = [];
 
-    window.reviews[user].push({
+    window.reviews[userId].push({
         'id': reviewId,
-        'userId': user,
+        'userId': userId,
         'startSeconds': startSeconds,
         'endSeconds': endSeconds,
         'start': new Date(startSeconds * 1000).toISOString().split('.')[0].replace('T', ' '),
@@ -127,13 +128,13 @@ let onLoad = async () => {
     main.innerHTML = ""; // clear loading screen
     main.style = "";
 
-    for (let user in window.reviews) {
+    for (let userId in window.reviews) {
         let div = document.createElement('div');
         let list = document.createElement('ul');
-        div.innerHTML = `<h3>User: ${user}</h3>`;
+        div.innerHTML = `<h3 id="user-${userId}">${fm(userId)}</h3>`;
         div.appendChild(list);
-        window.reviews[user].sort((a, b) => a.startSeconds - b.startSeconds);
-        window.reviews[user].forEach(review => list.appendChild(createEntry(review)));
+        window.reviews[userId].sort((a, b) => a.startSeconds - b.startSeconds);
+        window.reviews[userId].forEach(review => list.appendChild(createEntry(review)));
         main.appendChild(div);
     }
 };
