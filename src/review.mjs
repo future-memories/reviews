@@ -42,7 +42,6 @@ let getMemories = async () => {
 
   let memoryData = [];
   try {
-
     let q = reviewEnd == null ? query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
@@ -53,7 +52,7 @@ let getMemories = async () => {
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
       where('timestamp', '>=', new Date(Number(lastNonReviewedMemoryTimestamp) * 1000)),
-      where('timestamp', '<=', new Date(Number(reviewEnd) * 1000)),
+      where('timestamp', '<', new Date((Number(reviewEnd) + 1) * 1000)),
       orderBy('timestamp', 'desc'),
     );
     (await getDocs(q)).forEach((doc) => {
