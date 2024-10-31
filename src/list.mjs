@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, limit, doc, getDoc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 
@@ -71,7 +71,7 @@ let deleteReview = async (reviewId) => {
     try {
         let ref = doc(reviewDB, "reviews", reviewId);
         let archiveRef = doc(reviewDB, "archive", reviewId);
-        let review = await getDoc(ref);
+        let review = (await getDoc(ref)).data();
         await setDoc(archiveRef, review);
         await deleteDoc(ref);
     } catch (error) {
