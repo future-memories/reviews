@@ -67,7 +67,7 @@ let getMemories = async (userId, startSeconds, endSeconds) => {
 
 let createMemoryCard = (data) => {
   let img = document.createElement('img');
-  img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
+  img.src = `https://xiw.io/cdn-cgi/image/width=85,quality=80/${data.imageUrl}`;
   return img;
 };
 
