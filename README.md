@@ -6,8 +6,8 @@ User Display name is `FM` + last 6 chars from user_id uppercased:
 TODO:
 - continue working from draft
 - request for review
-- list of all reviews by user & date
 - terraform for firebase
+- check if user is authorized
 
 1. we need to remove saved images on the frontend as querying for
   `where('type', '==', 'Uploaded')` requires an index on the prod database.
