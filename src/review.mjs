@@ -32,20 +32,29 @@ let getMemories = async () => {
     throw new Error('Required URL parameter `userId` is missing');
   }
 
-  let lastReviewedMemoryTimestamp = url.get('since'); // in seconds
-  if (lastReviewedMemoryTimestamp == null) {
+  let lastNonReviewedMemoryTimestamp = url.get('since'); // in seconds
+  if (lastNonReviewedMemoryTimestamp == null) {
     alert('Required URL parameter `since` is missing');
     throw new Error('Required URL parameter `since` is missing');
   }
 
+  let reviewEnd = url.get('until');
+
   let memoryData = [];
   try {
-    let q = query(
+
+    let q = reviewEnd == null ? query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
-      where('timestamp', '>', new Date(lastReviewedMemoryTimestamp * 1000)),
+      where('timestamp', '>=', new Date(Number(lastNonReviewedMemoryTimestamp) * 1000)),
       orderBy('timestamp', 'desc'),
       // limit(100),
+    ) : query(
+      collection(fmDB, 'memory'),
+      where('userId', '==', userId),
+      where('timestamp', '>=', new Date(Number(lastNonReviewedMemoryTimestamp) * 1000)),
+      where('timestamp', '<=', new Date(Number(reviewEnd) * 1000)),
+      orderBy('timestamp', 'desc'),
     );
     (await getDocs(q)).forEach((doc) => {
       let data = doc.data(); // client-side filtering, due to no index for type

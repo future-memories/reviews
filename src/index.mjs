@@ -99,7 +99,7 @@ let onSubmit = async (e) => {
   let inputLastMemory = $("#last-memory").value;
   if (inputLastMemory == "") {
     $('#last-memory').style.display = 'block';
-    return quit("No reviews found for this user. Please input last reviewed memory (as URL or ID) and resubmit.");
+    return quit("No reviews found for this user. Please input last non-reviewed memory (as URL or ID) and resubmit.");
   }
 
   if (inputLastMemory == "ALL") return redirect(userId, {seconds: 0});
