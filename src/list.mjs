@@ -128,7 +128,10 @@ let onLoad = async () => {
     main.innerHTML = ""; // clear loading screen
     main.style = "";
 
-    for (let userId in window.reviews) {
+    let sortedUserIds = Object.keys(window.reviews).sort((userIdA, userIdB) => {
+        return fm(userIdA).localeCompare(fm(userIdB));
+    });
+    sortedUserIds.forEach(userId => {
         let div = document.createElement('div');
         let list = document.createElement('ul');
         div.innerHTML = `<h3 id="user-${userId}">${fm(userId)}</h3>`;
@@ -136,7 +139,7 @@ let onLoad = async () => {
         window.reviews[userId].sort((a, b) => a.startSeconds - b.startSeconds);
         window.reviews[userId].forEach(review => list.appendChild(createEntry(review)));
         main.appendChild(div);
-    }
+    });
 };
 
 
