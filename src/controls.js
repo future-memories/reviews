@@ -1,5 +1,4 @@
 let $ = (selector) => document.querySelector(selector);
-let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 
 document.addEventListener('x-memories-ready', () => {
   console.log('[EVENT] x-memories-ready');
@@ -19,7 +18,7 @@ document.addEventListener('x-memories-ready', () => {
   $('#btn-fail').addEventListener('click', controlFail);
   document.addEventListener('keyup', controlListener);
 
-  $('#review > table .user').innerText = fm(window.reviewState.getMemory().userId);
+  $('#review > table .user').innerText = window.reviewState.getMemory().userId;
   let minSeconds = window.memoryData[0].timestamp.seconds, maxSeconds = 0;
   window.memoryData.forEach(data => {
     minSeconds = Math.min(minSeconds, data.timestamp.seconds);
