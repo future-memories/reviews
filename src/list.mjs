@@ -87,12 +87,9 @@ let createEntry = (data) => {
     text.innerHTML = `Review <a href="print.html?reviewId=${data["id"]}">${data["id"]}</a> (<span class="start">${data["start"]}</span> - <span class="end">${data["end"]}</span>)`;
     entry.appendChild(text);
 
-    let btnEdit = document.createElement('button');
-    btnEdit.innerText = "Edit";
-    btnEdit.addEventListener('click', (_e) => {
-        // TODO: add until parameter
-        window.location.href = `review.html?userId=${user}&since=${startSeconds}&until=${endSeconds}`;
-    });
+    let btnEdit = document.createElement('a');
+    btnEdit.href = `review.html?userId=${data["userId"]}&since=${data["startSeconds"]}&until=${data["endSeconds"]}`;
+    btnEdit.innerHTML = "<button>Edit</button>";
     entry.appendChild(btnEdit);
 
     let btnDelete = document.createElement('button');
