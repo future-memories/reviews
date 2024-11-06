@@ -1,7 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getFirestore, getCountFromServer, setDoc, and, doc, collection, query, where, orderBy, limit, getDoc, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+try {
 let $ = (selector) => document.querySelector(selector);
+let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 
 const fmDB = getFirestore(initializeApp({
     projectId: "patr-3a75e",
@@ -23,6 +25,7 @@ const reviewDB = getFirestore(initializeApp({
     measurementId: "G-DN5NWXVX7N"
 }, "fm-reviews"));
 
+let _time = Date.now();
 let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", "Greece", "Bangladesh", "Nigeria", "France", "China", "Portugal", "Indonesia", "Israel", "Italy", "India", "Australia", "Sierra Leone", "Bosnia and Herzegovina", "United States", "Estonia", "Egypt", "Latvia", "Tanzania", "Saudi Arabia", "Malaysia", "Ghana", "United Arab Emirates", "Algeria", "Philippines", "Oman", "Switzerland", "Nepal", "Finland", "Peru", "Pakistan", "Benin", "Monaco", "Germany", "Türkiye", "Thailand", "Hungary", "Bulgaria", "Morocco", "Serbia", "Belgium"];
 
 // report:
@@ -54,7 +57,7 @@ let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", 
 // per user:
 // X memories since last review per user
 
-let getDailyReport = async (dateISO) => {
+let getDailyReport = async (dateISO, save = false) => {
     console.assert(dateISO.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid dateISO format");
     let dailyRef = doc(reviewDB, "analytics", `daily-${dateISO}`);
     try {
@@ -136,45 +139,114 @@ let getDailyReport = async (dateISO) => {
     }
     // TODO: relative timegraph report
 
+    if (!save) return report;
+
     try {
         await setDoc(dailyRef, report);
         console.log(`daily report for ${dateISO} generated and saved`);
+        return report;
     } catch (error) {
         console.error(error);
     }
+};
 
-    return report;
+let drawCountries = () => {
+    let labels = window.dailyReport.countries.map(c => c.country);
+    let data = window.dailyReport.countries.map(c => c.count);
+    new Chart($('#countries'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Memory Count by Country',
+                data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true },
+            }
+        }
+    });
+};
+
+let drawUsers = () => {
+    let labels = window.dailyReport.users.map(u => fm(u.user));
+    let data = window.dailyReport.users.map(u => u.count);
+    new Chart($('#users'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Memory Count by User',
+                data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true },
+            }
+        }
+    });
+};
+
+let drawTimegraph = () => {
+    let labels = window.dailyReport.timegraph.map(t => t.i);
+    let data = window.dailyReport.timegraph.map(t => t.count);
+    new Chart($('#timegraph'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Memory Count by Hour',
+                data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { beginAtZero: true },
+            }
+        }
+    });
 };
 
 let today = (new Date()).toISOString().split('T')[0];
-try {
-    let dailyReport = await getDailyReport(today);
-} catch (error) {
-    console.error(error);
-}
+window.dailyReport = await getDailyReport(today);
+
+
 
 
 let onLoad = () => {
-    // $('main').style = '';
-    $('main').innerHTML = `
-    <h1>Active Countries</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Country</th>
-                <th>Memories</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${sortedCountries.map((country) => `<tr><td>${country}</td><td>${memoriesPerCountry[country]}</td></tr>`).join('')}
-        </tbody>
-    </table>
-    Loaded in ${Date.now() - _time}ms
-    `;
+    $('body').style = '';
+    $('#spinner').remove();
+
+    drawCountries();
+    drawUsers();
+    drawTimegraph();
+
+    $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
 };
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
     onLoad();
 } else {
     document.addEventListener("DOMContentLoaded", onLoad);
+}
+
+
+
+// -----------------
+} catch (error) {
+    console.error(error);
 }

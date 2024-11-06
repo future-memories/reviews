@@ -18,3 +18,5 @@ TODO:
 http://localhost:8000/print.html?reviewId=LF5WaFljhONVqRpjyua83AfbqYv1-1728395955-1728395955
 https://explorer.futurememory.app/user/KBECFhfT3WZagfa9T0oxiVnCJsI3
 https://explorer.futurememory.app/memory/Jg1TBNgv6QGGz1bUaQSW/associations
+
+20hr for reviews

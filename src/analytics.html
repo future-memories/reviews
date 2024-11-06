@@ -7,14 +7,26 @@
     <title>DEMO: FM Analytics - Index</title>
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="analytics.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script defer src="analytics.mjs" type="module"></script>
 </head>
 
-<body>
-    <main style="display: grid; min-height: 80vh; place-items: center;">
-        <img
-            src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
+<body style="display: grid; min-height: 80vh; place-items: center;">
+    <img id="spinner"
+        src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
+    <main>
+        <h1>FM Analytics</h1>
+
+        <h3>Counties</h3>
+        <canvas id="countries"></canvas>
+
+        <h3>Users</h3>
+        <canvas id="users"></canvas>
+
+        <h3>Activity</h3>
+        <canvas id="timegraph"></canvas>
     </main>
+    <footer></footer>
 </body>
 
 </html>
