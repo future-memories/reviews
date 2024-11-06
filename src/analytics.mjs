@@ -13,54 +13,146 @@ const fmDB = getFirestore(initializeApp({
     measurementId: "G-Y2ZJ3SMS32"
 }, "fm"));
 
-let _time = Date.now();
+const reviewDB = getFirestore(initializeApp({
+    projectId: "id-fm-reviews",
+    appId: "1:139765414634:web:34544f92eeb915b3f27593",
+    apiKey: "AIzaSyCSaGPsgk4PiNAL2bp0h_lq6VDBdOFdAWM",
+    authDomain: "id-fm-reviews.firebaseapp.com",
+    storageBucket: "id-fm-reviews.appspot.com",
+    messagingSenderId: "139765414634",
+    measurementId: "G-DN5NWXVX7N"
+}, "fm-reviews"));
 
-// can't do "group by", we can do count on where clauses, but we need the condition for where
-// let's get a list of countries (hardcoded now, stored in db later), list of active users
+let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", "Greece", "Bangladesh", "Nigeria", "France", "China", "Portugal", "Indonesia", "Israel", "Italy", "India", "Australia", "Sierra Leone", "Bosnia and Herzegovina", "United States", "Estonia", "Egypt", "Latvia", "Tanzania", "Saudi Arabia", "Malaysia", "Ghana", "United Arab Emirates", "Algeria", "Philippines", "Oman", "Switzerland", "Nepal", "Finland", "Peru", "Pakistan", "Benin", "Monaco", "Germany", "Türkiye", "Thailand", "Hungary", "Bulgaria", "Morocco", "Serbia", "Belgium"];
 
-let getActiveCountries = async (startDate) => {
+// report:
+// -> id: <daily/monthly/yearly>-<iso>
+//   -> daily-2024-11-05
+//   -> monthly-2024-11
+//   -> yearly-2024
+// -> type: daily/weekly/monthly/yearly
+//   -> weekly = last 7 days
+//   -> daily = from last daily report (23:59:59) to now
+// -> timestamp: (daily? 23:59:59) (monthly? all days from month) (yearly? all months from year)
+// -> countries: sorted list of
+//   -> country
+//   -> count
+//   -> percentage
+//   -> cities: sorted list of
+//     -> city
+//     -> count
+//     -> percentage
+// -> users: sorted list of
+//   -> user
+//   -> count
+// -> timegraph: list of
+//   -> index = hour of day
+//   -> value = count memories withing this hour
+// -> relative timegraph: same list but with local time = timestamp + timezone_diff(country)
+
+// cell managers reports
+// per user:
+// X memories since last review per user
+
+let getDailyReport = async (dateISO) => {
+    console.assert(dateISO.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid dateISO format");
+    let dailyRef = doc(reviewDB, "analytics", `daily-${dateISO}`);
     try {
-        let memories = [];
-        let q = query(collection(fmDB, "memory"), where("timestamp", ">", startDate), orderBy("timestamp", "desc"));
-        (await getDocs(q)).forEach((doc) => memories.push(doc.data()));
-        return [...new Set(memories.map(m => m.country))];
+        let snapshot = await getDoc(dailyRef);
+        if (snapshot.exists()) {
+            return snapshot.data();
+        }
     } catch (error) {
         console.log(error);
     }
-};
-// TODO: compare active countries with list
+    console.log(`daily report for ${dateISO} not found, generating...`);
 
-// ignore "Unknown" and " "
-let countries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", "Greece", "Bangladesh", "Nigeria", "France", "China", "Portugal", "Indonesia", "Israel", "Italy", "India", "Australia", "Sierra Leone", "Bosnia and Herzegovina", "United States", "Estonia", "Egypt", "Latvia", "Tanzania", "Saudi Arabia", "Malaysia", "Ghana", "United Arab Emirates", "Algeria", "Philippines", "Oman", "Switzerland", "Nepal", "Finland", "Peru", "Pakistan", "Benin", "Monaco", "Germany", "Türkiye", "Thailand", "Hungary", "Bulgaria", "Morocco", "Serbia", "Belgium"];
+    let report = {
+        id: `daily-${dateISO}`,
+        type: "daily",
+        timestamp: (new Date(dateISO)).getTime(),
+        countries: [],
+        users: [],
+        timegraph: [],
+        relativeTimegraph: null,
+    };
 
-// make a count query for each country
-// TODO: get distinct users for each country
-let memoriesPerCountry = {};
-countries.forEach((country) => memoriesPerCountry[country] = 0);
-let startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // a week ago
-// for (let country of countries) {
-//     try {
-//         let q = query(collection(fmDB, "memory"), where("timestamp", ">", startDate), where("country", "==", country));
-//         memoriesPerCountry[country] = await getCountFromServer(q);
-//     } catch (error) {
-//         console.log(error);
-//     }
-// }
-try {
-    let q = query(collection(fmDB, "memory"), where("timestamp", ">", startDate));
-    (await getDocs(q)).forEach((doc) => {
-        let data = doc.data();
-        if (data.country in memoriesPerCountry) {
-            memoriesPerCountry[data.country]++;
+    let memories = [];
+    try {
+        let date = new Date(dateISO);
+        let q = query(
+            collection(fmDB, "memory"),
+            where("timestamp", ">=", date),
+            where("timestamp", "<", new Date(date.getTime() + 24 * 60 * 60 * 1000)),
+            orderBy("timestamp", "desc")
+        );
+        (await getDocs(q)).forEach((doc) => {
+            let data = doc.data(); // then check for userId == creatorId
+            if (data.type == 'Uploaded') memories.push(data);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+
+    // countries report
+    let countries = [...new Set(memories.map(m => m.country))].map(c => c === " " ? "Unknown" : c);
+    let total = memories.length;
+    for (let country of countries) {
+        let count = memories.filter(m => m.country === country).length;
+        let cities = [...new Set(memories.filter(m => m.country === country).map(m => m.city))];
+        // cities in `country` report
+        let cityReport = [];
+        for (let city of cities) {
+            let cityCount = memories.filter(m => m.city === city).length;
+            cityReport.push({
+                city,
+                count: cityCount,
+                percentage: cityCount / count * 100
+            });
         }
-    });
+        cityReport.sort((a, b) => b.count - a.count);
+
+        report.countries.push({
+            country,
+            count,
+            percentage: count / total * 100,
+            cities: cityReport,
+        });
+    }
+    report.countries.sort((a, b) => b.count - a.count);
+
+    // users report
+    let users = [...new Set(memories.map(m => m.userId))];
+    for (let user of users) {
+        let count = memories.filter(m => m.userId === user).length;
+        report.users.push({ user, count });
+    }
+    report.users.sort((a, b) => b.count - a.count);
+
+    // timegraph report
+    for (let i = 0; i < 24; i++) {
+        let count = memories.filter(m => new Date(m.timestamp.seconds * 1000).getHours() === i).length;
+        report.timegraph.push({ i, count });
+    }
+    // TODO: relative timegraph report
+
+    try {
+        await setDoc(dailyRef, report);
+        console.log(`daily report for ${dateISO} generated and saved`);
+    } catch (error) {
+        console.error(error);
+    }
+
+    return report;
+};
+
+let today = (new Date()).toISOString().split('T')[0];
+try {
+    let dailyReport = await getDailyReport(today);
 } catch (error) {
-    console.log(error);
+    console.error(error);
 }
 
-console.log(memoriesPerCountry);
-// sort by count
-let sortedCountries = Object.keys(memoriesPerCountry).sort((a, b) => memoriesPerCountry[b] - memoriesPerCountry[a]);
 
 let onLoad = () => {
     // $('main').style = '';
