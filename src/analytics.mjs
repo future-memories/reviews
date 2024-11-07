@@ -251,6 +251,12 @@ let onLoad = () => {
     drawTimegraph();
 
     $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
+
+    $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
+        e.preventDefault();
+        let date = $('form#datePicker > input[type="date"]').value;
+        window.location.href = `?date=${date}`;
+    });
 };
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
