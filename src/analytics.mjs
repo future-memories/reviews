@@ -4,6 +4,7 @@ import { getFirestore, getCountFromServer, setDoc, and, doc, collection, query, 
 try {
 let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
+const url = new URLSearchParams(new URL(window.location.href).search);
 
 const fmDB = getFirestore(initializeApp({
     projectId: "patr-3a75e",
@@ -140,6 +141,8 @@ let getDailyReport = async (dateISO, save = false) => {
     // TODO: relative timegraph report
 
     if (!save) return report;
+    // TODO: save only if period is past (for example, we can save the daily report only after the next day of 00:00)
+    // or param inside the document to check completeness?
 
     try {
         await setDoc(dailyRef, report);
@@ -221,10 +224,22 @@ let drawTimegraph = () => {
     });
 };
 
+// let yesterday = (new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
 let today = (new Date()).toISOString().split('T')[0];
-window.dailyReport = await getDailyReport(today);
+let reportDate = url.get('date') || today;
+window.dailyReport = await getDailyReport(reportDate);
 
 
+// get date from URL params, default to today
+// show date in title
+// better vis
+
+// store all users, show only few of them
+// top 20 users (highlight which have reviews on)
+// bottom 20 users (highlight which have reviews on) (with at least one memory from period)
+
+// weekly reports
+// monthly reports -> store
 
 
 let onLoad = () => {
