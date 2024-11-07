@@ -2,3 +2,8 @@ body { margin: 1rem; }
 main { max-width: 100ch; margin-inline: auto; }
 /* has the date picker form */
 section#temp-nav { margin-block: 6rem; margin-left: 2rem; }
+
+
+/* title & summary */
+h2.title { margin-bottom: 0.5rem; }
+h2.title + p { margin-top: 0.5rem; color: silver; }

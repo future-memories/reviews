@@ -230,8 +230,7 @@ let reportDate = url.get('date') || today;
 window.dailyReport = await getDailyReport(reportDate);
 
 
-// get date from URL params, default to today
-// show date in title
+// TODO list:
 // better vis
 
 // store all users, show only few of them
@@ -250,6 +249,8 @@ let onLoad = () => {
     drawUsers();
     drawTimegraph();
 
+    $('h2.title').innerText = `Report for ${reportDate}`;
+    $('h2.title + p').innerText = `Includes all memories from ${reportDate} 00:00:00 to ${reportDate} 23:59:59 UTC`;
     $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
 
     $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
