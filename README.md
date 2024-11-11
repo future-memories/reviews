@@ -9,9 +9,6 @@ TODO:
 - terraform for firebase
 - check if user is authorized
 
-1. we need to remove saved images on the frontend as querying for
-  `where('type', '==', 'Uploaded')` requires an index on the prod database.
-
 <!-- https://firebase.google.com/docs/firestore/manage-data/add-data -->
 
 
@@ -20,3 +17,8 @@ https://explorer.futurememory.app/user/KBECFhfT3WZagfa9T0oxiVnCJsI3
 https://explorer.futurememory.app/memory/Jg1TBNgv6QGGz1bUaQSW/associations
 
 20hr for reviews
+
+TODO:
+- cell manager page -> one per country, memory count since last review (highlight if more than 200)
+- monthly report -> url `type` param, same `date` param (extract the date, split by dash)
+- onSnapshot() live updates for daily report ???
