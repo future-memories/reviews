@@ -27,7 +27,56 @@ const reviewDB = getFirestore(initializeApp({
 }, "fm-reviews"));
 
 let _time = Date.now();
-let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", "Greece", "Bangladesh", "Nigeria", "France", "China", "Portugal", "Indonesia", "Israel", "Italy", "India", "Australia", "Sierra Leone", "Bosnia and Herzegovina", "United States", "Estonia", "Egypt", "Latvia", "Tanzania", "Saudi Arabia", "Malaysia", "Ghana", "United Arab Emirates", "Algeria", "Philippines", "Oman", "Switzerland", "Nepal", "Finland", "Peru", "Pakistan", "Benin", "Monaco", "Germany", "Türkiye", "Thailand", "Hungary", "Bulgaria", "Morocco", "Serbia", "Belgium"];
+
+// rought approximation, consider using the google maps API with the precise coordinates of each memory
+let timeZoneDiff = {
+    "Spain": 1,
+    "United Kingdom": 0,
+    "Kenya": 3,
+    "Zambia": 2,
+    "Singapore": 8,
+    "Greece": 2,
+    "Bangladesh": 6,
+    "Nigeria": 1,
+    "France": 1,
+    "China": 8,
+    "Portugal": 0,
+    "Indonesia": 8, // west = +7, central = +8, east = +9
+    "Israel": 2,
+    "Italy": 1,
+    "India": 5.5,
+    "Australia": 11,
+    "Sierra Leone": 0,
+    "Bosnia and Herzegovina": 1,
+    "United States": -8,
+    "Estonia": 2,
+    "Egypt": 2,
+    "Latvia": 2,
+    "Tanzania": 3,
+    "Saudi Arabia": 3,
+    "Malaysia": 8,
+    "Ghana": 0,
+    "United Arab Emirates": 4,
+    "Algeria": 1,
+    "Philippines": 8,
+    "Oman": 4,
+    "Switzerland": 1,
+    "Nepal": 6,
+    "Finland": 2,
+    "Peru": -5,
+    "Pakistan": 5,
+    "Benin": 1,
+    "Monaco": 1,
+    "Germany": 1,
+    "Türkiye": 3,
+    "Thailand": 7,
+    "Hungary": 1,
+    "Bulgaria": 2,
+    "Morocco": 1,
+    "Serbia": 1,
+    "Belgium": 1,
+};
+let getTimeZoneDiff = (country) => timeZoneDiff[country] || 0;
 
 // report:
 // -> id: <daily/monthly/yearly>-<iso>
@@ -51,8 +100,7 @@ let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", 
 //   -> count
 // -> timegraph: list of
 //   -> index = hour of day
-//   -> value = count memories withing this hour
-// -> relative timegraph: same list but with local time = timestamp + timezone_diff(country)
+//   -> value = count memories withing this hour (in the respective country TZ ~approx)
 
 // cell managers reports
 // per user:
@@ -134,11 +182,11 @@ let getDailyReport = async (dateISO) => {
     report.users.sort((a, b) => b.count - a.count);
 
     // timegraph report
+    let memoryHours = memories.map(m => new Date(m.timestamp.seconds * 1000 + getTimeZoneDiff(m.country) * 1000 * 60 * 60).getHours());
     for (let i = 0; i < 24; i++) {
-        let count = memories.filter(m => new Date(m.timestamp.seconds * 1000).getHours() === i).length;
+        let count = memoryHours.filter(h => h === i).length;
         report.timegraph.push({ i, count });
     }
-    // TODO: relative timegraph report
 
     let todayDate = (new Date()).toISOString().split('T')[0];
     if (dateISO >= todayDate) return report;
