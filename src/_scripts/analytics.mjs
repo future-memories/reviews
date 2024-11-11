@@ -58,7 +58,7 @@ let mostCountries = ["Spain", "United Kingdom", "Kenya", "Zambia", "Singapore", 
 // per user:
 // X memories since last review per user
 
-let getDailyReport = async (dateISO, save = false) => {
+let getDailyReport = async (dateISO) => {
     console.assert(dateISO.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid dateISO format");
     let dailyRef = doc(reviewDB, "analytics", `daily-${dateISO}`);
     try {
@@ -140,9 +140,8 @@ let getDailyReport = async (dateISO, save = false) => {
     }
     // TODO: relative timegraph report
 
-    if (!save) return report;
-    // TODO: save only if period is past (for example, we can save the daily report only after the next day of 00:00)
-    // or param inside the document to check completeness?
+    let todayDate = (new Date()).toISOString().split('T')[0];
+    if (dateISO >= todayDate) return report;
 
     try {
         await setDoc(dailyRef, report);
