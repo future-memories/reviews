@@ -1,8 +1,25 @@
 body { margin: 1rem; }
-main { max-width: 100ch; margin-inline: auto; }
-/* has the date picker form */
-section#temp-nav { margin-block: 6rem; margin-left: 2rem; }
 
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-inline: 2rem;
+    grid-template-areas: "header header"
+                         "countries-top countries-bottom"
+                         "users-top users-bottom"
+                         "activity temp-nav";
+}
+header { grid-area: header; }
+section#countries-top { grid-area: countries-top; }
+section#countries-bottom { grid-area: countries-bottom; }
+section#users-top { grid-area: users-top; }
+section#users-bottom { grid-area: users-bottom; }
+section#activity { grid-area: activity; }
+section#temp-nav { grid-area: temp-nav; }
+main > * { border: 1px solid silver; border-radius: 4px; padding: 1rem; }
+footer { margin-top: 2rem; color: silver; }
 
 /* title & summary */
 h2.title { margin-bottom: 0.5rem; }

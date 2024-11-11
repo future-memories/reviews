@@ -153,10 +153,12 @@ let getDailyReport = async (dateISO, save = false) => {
     }
 };
 
-let drawCountries = () => {
+let getCountryChart = (bestFirst = true) => {
     let labels = window.dailyReport.countries.map(c => c.country);
     let data = window.dailyReport.countries.map(c => c.count);
-    new Chart($('#countries'), {
+    data = bestFirst ? data.slice(0, 10) : data.slice(-10).reverse();
+    labels = bestFirst ? labels.slice(0, 10) : labels.slice(-10).reverse();
+    return {
         type: 'bar',
         data: {
             labels,
@@ -174,13 +176,16 @@ let drawCountries = () => {
                 x: { beginAtZero: true },
             }
         }
-    });
+    };
 };
 
-let drawUsers = () => {
-    let labels = window.dailyReport.users.map(u => fm(u.user));
+let getUsersChart = (bestFirst = true) => {
     let data = window.dailyReport.users.map(u => u.count);
-    new Chart($('#users'), {
+    let labels = window.dailyReport.users.map(u => fm(u.user));
+    data = bestFirst ? data.slice(0, 10) : data.slice(-10).reverse();
+    labels = bestFirst ? labels.slice(0, 10) : labels.slice(-10).reverse();
+
+    return {
         type: 'bar',
         data: {
             labels,
@@ -198,13 +203,13 @@ let drawUsers = () => {
                 x: { beginAtZero: true },
             }
         }
-    });
+    };
 };
 
-let drawTimegraph = () => {
+let getActivityChart = () => {
     let labels = window.dailyReport.timegraph.map(t => t.i);
     let data = window.dailyReport.timegraph.map(t => t.count);
-    new Chart($('#timegraph'), {
+    return {
         type: 'line',
         data: {
             labels,
@@ -221,7 +226,7 @@ let drawTimegraph = () => {
                 x: { beginAtZero: true },
             }
         }
-    });
+    };
 };
 
 // let yesterday = (new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
@@ -245,9 +250,11 @@ let onLoad = () => {
     $('body').style = '';
     $('#spinner').remove();
 
-    drawCountries();
-    drawUsers();
-    drawTimegraph();
+    new Chart($('section#countries-top > canvas'), getCountryChart(true));
+    new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
+    new Chart($('section#users-top > canvas'), getUsersChart(true));
+    new Chart($('section#users-bottom > canvas'), getUsersChart(false));
+    new Chart($('section#activity > canvas'), getActivityChart());
 
     $('h2.title').innerText = `Report for ${reportDate}`;
     $('h2.title + p').innerText = `Includes all memories from ${reportDate} 00:00:00 to ${reportDate} 23:59:59 UTC`;

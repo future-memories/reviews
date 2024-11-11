@@ -15,28 +15,46 @@
     <img id="spinner"
         src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
     <main>
-        <h1>FM Analytics</h1>
+        <header>
+            <h1>FM Analytics</h1>
 
-        <h2 class="title">Report for {{ date }}</h2>
-        <p>Includes all memories from {{ start }} until {{ end }} UTC</p>
+            <h2 class="title">Report for {{ date }}</h2>
+            <p>Includes all memories from {{ start }} until {{ end }} UTC</p>
+        </header>
 
-        <h3>Counties</h3>
-        <canvas id="countries"></canvas>
+        <section id="countries-top">
+            <h3>Top Countries</h3>
+            <canvas></canvas>
+        </section>
+        <section id="countries-bottom">
+            <h3>Bottom Countries</h3>
+            <canvas></canvas>
+        </section>
 
-        <h3>Users</h3>
-        <canvas id="users"></canvas>
+        <section id="users-top">
+            <h3>Top Users</h3>
+            <canvas></canvas>
+        </section>
+        <section id="users-bottom">
+            <h3>Bottom Users</h3>
+            <canvas></canvas>
+        </section>
 
-        <h3>Activity</h3>
-        <canvas id="timegraph"></canvas>
+        <section id="activity">
+            <h3>Activity</h3>
+            <canvas></canvas>
+        </section>
+
+        <section id="temp-nav">
+            <!-- TBD: Navigation... -->
+            <!-- single day, month picker, year picker -->
+            <h1>Pick a date</h1>
+            <form id="datePicker">
+                <input type="date">
+                <button type="submit">Submit</button>
+            </form>
+        </section>
     </main>
-    <section id="temp-nav">
-        <!-- TBD: Navigation... -->
-        <h1>Pick a date</h1>
-        <form id="datePicker">
-            <input type="date">
-            <button type="submit">Submit</button>
-        </form>
-    </section>
     <footer></footer>
 </body>
 
