@@ -134,7 +134,7 @@ let onLoad = async () => {
     sortedUserIds.forEach(userId => {
         let div = document.createElement('div');
         let list = document.createElement('ul');
-        div.innerHTML = `<h3 id="user-${userId}">${fm(userId)}</h3>`;
+        div.innerHTML = `<h3 id="user-${userId}">${fm(userId)} <a class="profile-link" href="https://explorer.futurememory.app/user/${userId}">profile link</a></h3>`;
         div.appendChild(list);
         window.reviews[userId].sort((a, b) => a.startSeconds - b.startSeconds);
         window.reviews[userId].forEach(review => list.appendChild(createEntry(review)));

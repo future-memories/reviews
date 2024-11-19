@@ -3,3 +3,5 @@ main > div { margin-block: 2rem; }
 main > div > h3 { margin-block: 0.5rem; }
 button { margin-left: 1rem; }
 ul { margin: 0; padding-left: 2rem; }
+a.profile-link { font-weight: 100; font-size: 1rem; text-decoration-color: coral; color: coral; }
+a.profile-link:visited { text-decoration-color: rgb(171, 83, 51); color: rgb(171, 83, 51); }
