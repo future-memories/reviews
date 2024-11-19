@@ -41,13 +41,14 @@ let parseMemoryId = (input) => {
   return res?.groups?.memoryId ?? null;
 };
 
-let getLastReview = async (userId) => {
+let getLastReviewTime = async (userId) => {
   try {
     let q = query(collection(reviewDB, 'reviews'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(1));
 
     let results = [];
     (await getDocs(q)).forEach((doc) => {
-      results.push(doc.data());
+      let endSeconds = doc.id.split('-').pop();
+      results.push(endSeconds);
     });
 
     if (results.length === 1) {
@@ -58,7 +59,7 @@ let getLastReview = async (userId) => {
   } catch (error) {
     let isWarning = error.message.startsWith("[W]");
     let message = isWarning ? error.message.substring(3) : error.message;
-    (isWarning ? console.warn : console.error)(`X-Error[getLastReview]: ${message}`);
+    (isWarning ? console.warn : console.error)(`X-Error[getLastReviewTime]: ${message}`);
     return null;
   }
 };
@@ -88,13 +89,13 @@ let getMemory = async (memoryId) => {
 let onSubmit = async (e) => {
   e.preventDefault(); // prevent default form behavior
   let quit = (msg) => { alert(msg); return false };
-  let redirect = (userId, timestamp) => window.location.href = `review.html?userId=${userId}&since=${timestamp.seconds}`;
+  let redirect = (userId, timestamp, exclusive = false) => window.location.href = `review.html?userId=${userId}&since=${timestamp.seconds}` + (exclusive ? "&exclusive=true" : "");
 
   let userId = parseUserId($("#user").value);
   if (userId == null) return quit("Invalid user ID");
 
-  let review = await getLastReview(userId);
-  if (review != null) return redirect(userId, review.timestamp);
+  let lastReviewEnd = await getLastReviewTime(userId);
+  if (lastReviewEnd != null) return redirect(userId, lastReviewEnd, true);
 
   let inputLastMemory = $("#last-memory").value;
   if (inputLastMemory == "") {

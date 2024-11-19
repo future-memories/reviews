@@ -32,26 +32,29 @@ let getMemories = async () => {
     throw new Error('Required URL parameter `userId` is missing');
   }
 
-  let lastNonReviewedMemoryTimestamp = url.get('since'); // in seconds
-  if (lastNonReviewedMemoryTimestamp == null) {
+  let lastMemoryTimestamp = url.get('since'); // in seconds
+  if (lastMemoryTimestamp == null) {
     alert('Required URL parameter `since` is missing');
     throw new Error('Required URL parameter `since` is missing');
   }
 
   let reviewEnd = url.get('until');
+  // first review in the system is inclusive (the memory link ypu provide will be reviewed)
+  // subsequent reviews are exclusive (the last reviewed memory will be excluded)
+  let comparison = url.get('exclusive') == 'true' ? '>' : '>=';
 
   let memoryData = [];
   try {
     let q = reviewEnd == null ? query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
-      where('timestamp', '>=', new Date(Number(lastNonReviewedMemoryTimestamp) * 1000)),
+      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000)),
       orderBy('timestamp', 'desc'),
       // limit(100),
     ) : query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
-      where('timestamp', '>=', new Date(Number(lastNonReviewedMemoryTimestamp) * 1000)),
+      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000)),
       where('timestamp', '<', new Date((Number(reviewEnd) + 1) * 1000)),
       orderBy('timestamp', 'desc'),
     );
