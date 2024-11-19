@@ -95,7 +95,7 @@ let onSubmit = async (e) => {
   if (userId == null) return quit("Invalid user ID");
 
   let lastReviewEnd = await getLastReviewTime(userId);
-  if (lastReviewEnd != null) return redirect(userId, lastReviewEnd, true);
+  if (lastReviewEnd != null) return redirect(userId, {seconds: lastReviewEnd}, true);
 
   let inputLastMemory = $("#last-memory").value;
   if (inputLastMemory == "") {
