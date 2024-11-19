@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, setDoc, doc, collection, query, where, orderBy, limit, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, getDoc, setDoc, doc, collection, query, where, orderBy, limit, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
@@ -76,6 +76,30 @@ let getMemories = async () => {
   return memoryData;
 };
 
+let getThisReview = async () => {
+  let userId = url.get('userId');
+  if (userId == null) throw new Error('Required URL parameter `userId` is missing');
+
+  let start = url.get('since');
+  if (start == null) throw new Error('Required URL parameter `since` is missing');
+
+  let end = url.get('until');
+  if (end == null) return null; // no reviews up to now
+
+  try {
+    let docSnap = await getDoc(doc(reviewDB, 'reviews', `${userId}-${start}-${end}`));
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      alert('The review you\'re trying to edit was not found. Please check the url.');
+      throw new Error('Editing a non-existing review. WTF?');
+    }
+  } catch (error) {
+    console.error("X-Error:", error);
+    throw error;
+  }
+}
+
 let createMemoryCard = (data) => {
   let card = document.createElement('div');
   card.className = 'card';
@@ -96,6 +120,7 @@ let createMemoryCard = (data) => {
 };
 
 window.memoryData = await getMemories();
+window.editReview = await getThisReview();
 window.memoryCards = window.memoryData.map(data => createMemoryCard(data));
 window.reviewState = {
   index: 0,
@@ -111,7 +136,7 @@ window.reviewState = {
   })(),
   moveIndexBy(delta) {
     this.index = (this.index + delta + this.total) % this.total;
-    if (this.submitted == false && this.reviewed == this.total && this.index == 0) alert("Review complete!");
+    if (this.submitted == false && this.reviewed == this.total && this.index == 0 && window.editReview == null) alert("Review complete!");
   },
   getPercentageReviewed() {
     let percentage = Math.round(this.reviewed / this.total * 100 * 100) / 100;
@@ -134,6 +159,12 @@ let onSubmit = async (e) => {
 
   if (window.reviewState.reviewed < window.reviewState.total) {
     return quit('Please review all images before submitting');
+  }
+
+  if (window.editReview != null) {
+    if (!confirm(`This review already exists. Do you want to override it?`)) {
+      return quit('Review submission cancelled');
+    }
   }
 
   let statusMap = {

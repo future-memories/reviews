@@ -28,6 +28,23 @@ document.addEventListener('x-memories-ready', () => {
   let maxDate = new Date(maxSeconds * 1000).toISOString();
   $('#review > table .start').innerText = minDate.split('.')[0].replace('T', ' ');
   $('#review > table .end').innerText = maxDate.split('.')[0].replace('T', ' ');
+
+  // fill status data from existing review if we're doing an edit
+  if (window.editReview != null) {
+    let statusReverseMap = {
+      0: 'pending', // should never exist
+      1: 'good',
+      2: 'bad',
+      3: 'task',
+      4: 'fail',
+    };
+    console.assert(window.editReview.data.length == window.memoryData.length);
+    window.editReview.data.forEach(statusId => {
+      window.reviewState.setStatus(statusReverseMap[statusId]);
+      window.reviewState.moveIndexBy(1);
+    });
+    update();
+  }
 });
 
 let controlListener = (event) => {
