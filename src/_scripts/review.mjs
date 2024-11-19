@@ -181,6 +181,7 @@ let onSubmit = async (e) => {
     userId: userId,
     timestamp: Timestamp.now(),
     data: data,
+    imageIds: window.memoryData.map(d => d.imageId),
     comment: $("#comment").value,
     total: window.reviewState.total,
     reviewSummary: {
