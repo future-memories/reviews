@@ -43,16 +43,26 @@ let parseMemoryId = (input) => {
 
 let getLastReviewTime = async (userId) => {
   try {
-    let q = query(collection(reviewDB, 'reviews'), where('userId', '==', userId), orderBy('timestamp', 'desc'), limit(1));
+    // we only need the document IDs, but Firestore doesn't allow us to just fetch the IDs
+    // or maybe it does, but I don't know how to do it & ChatGPT hallucinates a `select()` method
+    // TODO: fix this if it eveer becomes too slow
+    let q = query(
+      collection(reviewDB, 'reviews'),
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc'),
+    );
 
-    let results = [];
-    (await getDocs(q)).forEach((doc) => {
-      let endSeconds = doc.id.split('-').pop();
-      results.push(endSeconds);
+    // order document IDs by the last image timestamp (part of the id)
+    let querySnapshot = await getDocs(q);
+    let documentIds = querySnapshot.docs.map(doc => doc.id).sort((a, b) => {
+      let aSeconds = a.split('-').pop();
+      let bSeconds = b.split('-').pop();
+      console.log(aSeconds, bSeconds);
+      return Number(bSeconds) - Number(aSeconds);
     });
 
-    if (results.length === 1) {
-      return results[0];
+    if (documentIds.length > 0) {
+      return Number(documentIds[0].split('-').pop());
     } else {
       throw new Error(`[W]No memories found for user "${userId}"`);
     }
