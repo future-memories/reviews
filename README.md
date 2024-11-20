@@ -3,22 +3,23 @@
 User Display name is `FM` + last 6 chars from user_id uppercased:
 `kq8BjU5js0f34tMt63bltwHy1wO2` -> `FMHY1WO2`
 
-TODO:
-- continue working from draft
-- request for review
-- terraform for firebase
-- check if user is authorized
+docs: https://firebase.google.com/docs/firestore/manage-data/add-data
 
-<!-- https://firebase.google.com/docs/firestore/manage-data/add-data -->
+### TODO - reviews
 
+- [X] continue working from draft
+- [ ] request for review
+- [ ] terraform for firebase
+- [ ] check if user is authorized
+- [ ] single module file for common operations, functions &
 
-http://localhost:8000/print.html?reviewId=LF5WaFljhONVqRpjyua83AfbqYv1-1728395955-1728395955
-https://explorer.futurememory.app/user/KBECFhfT3WZagfa9T0oxiVnCJsI3
-https://explorer.futurememory.app/memory/Jg1TBNgv6QGGz1bUaQSW/associations
+### TODO - analytics
 
-20hr for reviews
-
-TODO:
-- cell manager page -> one per country, memory count since last review (highlight if more than 200)
-- monthly report -> url `type` param, same `date` param (extract the date, split by dash)
-- onSnapshot() live updates for daily report ???
+- [ ] cell manager page -> one per country, memory count since last review (highlight if more than 200)
+- [ ] monthly report -> url `type` param, same `date` param (extract the date, split by dash)
+- [ ] onSnapshot() live updates for daily report ???
+- [ ] move to new firebase project (but maybe we want the terraform here now)
+- [ ] UI/UX
+  - [ ] usernames should be links (clickable)
+  - [ ] countries should be clickable -> go to cell manager's page
+  - [ ] periods for 1 week, 1 month, 3 months
