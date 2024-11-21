@@ -123,9 +123,41 @@ let getTimeZoneDiff = (country) => timeZoneDiff[country] || 0;
 // per user:
 // X memories since last review per user
 
-let getDailyReport = async (dateISO) => {
-    console.assert(dateISO.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid dateISO format");
-    let dailyRef = doc(reviewDB, "analytics", `daily-${dateISO}`);
+let getReportType = (input) => {
+    switch (input.length) {
+        case 7:  return 'quarterly'; // YYYY-Q1
+        case 8:  return 'monthly';   // YYYY-JAN
+        case 10: return 'daily';     // YYYY-MM-DD
+        case 15: return 'weekly';    // week-YYYY-MM-DD
+        default: alert(`Invalid date format: ${input}`);
+    }
+};
+let getReportStartDate = (input) => {
+    switch (input.length) {
+        case 7:
+            let q_year = input.substring(0, 4);
+            let q_month = ['01', '04', '07', '10'][Number(input[6]) - 1];
+            return `${q_year}-${q_month}-01`;
+        case 8:
+            let m_year = input.substring(4);
+            let m_month = {
+                'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+                'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+                'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
+            }[input.substring(5, 8).toUpperCase()];
+            return `${m_year}-${m_month}-01`;
+        case 10:
+            return input;
+        case 15:
+            return input.substring('week-'.length);
+        default: alert(`Invalid date format: ${input}`);
+    }
+};
+
+let getDailyReport = async (input) => {
+    console.assert(input.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid date, expected ISO format");
+    let reportId = `daily-${input}`;
+    let dailyRef = doc(reviewDB, "analytics", reportId);
     try {
         let snapshot = await getDoc(dailyRef);
         if (snapshot.exists()) {
@@ -134,12 +166,12 @@ let getDailyReport = async (dateISO) => {
     } catch (error) {
         console.log(error);
     }
-    console.log(`daily report for ${dateISO} not found, generating...`);
+    console.log(`daily report for ${input} not found, generating...`);
 
     let report = {
-        id: `daily-${dateISO}`,
+        id: reportId,
         type: "daily",
-        timestamp: (new Date(dateISO)).getTime(),
+        timestamp: iso2date(input).getTime(),
         countries: [],
         users: [],
         timegraph: [],
@@ -148,11 +180,10 @@ let getDailyReport = async (dateISO) => {
 
     let memories = [];
     try {
-        let date = new Date(dateISO);
         let q = query(
             collection(fmDB, "memory"),
             where("timestamp", ">=", date),
-            where("timestamp", "<", new Date(date.getTime() + 24 * 60 * 60 * 1000)),
+            where("timestamp", "<", new Date(iso2date(input).getTime() + 24 * 60 * 60 * 1000)),
             orderBy("timestamp", "desc")
         );
         (await getDocs(q)).forEach((doc) => {
@@ -206,28 +237,28 @@ let getDailyReport = async (dateISO) => {
     }
 
     let todayDate = date2iso(new Date());
-    if (dateISO >= todayDate) return report;
+    if (input >= todayDate) return report;
 
     try {
         await setDoc(dailyRef, report);
-        console.log(`daily report for ${dateISO} generated and saved`);
+        console.log(`daily report for ${input} generated and saved`);
         return report;
     } catch (error) {
         console.error(error);
     }
 };
 
-let getWeeklyReport = async (dateISO) => {
+let getWeeklyReport = async (input) => {
     alert("Weekly reports are not supported yet");
     throw new Error("Weekly reports are not supported yet");
 }
 
-let getMonthlyReport = async (dateISO) => {
+let getMonthlyReport = async (input) => {
     alert("Monthly reports are not supported yet");
     throw new Error("Monthly reports are not supported yet");
 }
 
-let getQuarterlyReport = async (dateISO) => {
+let getQuarterlyReport = async (input) => {
     alert("Quarterly reports are not supported yet");
     throw new Error("Quarterly reports are not supported yet");
 }
@@ -314,40 +345,8 @@ let getActivityChart = () => {
     };
 };
 
-// TODO: test this switch expression
-let [reportType, reportDate] = [null, null];
 let urlDate = url.get('date');
-switch (urlDate.length) {
-    // YYYY-Q1, YYYY-Q2, YYYY-Q3, YYYY-Q4
-    case 7:
-        reportType = 'quarterly';
-        let q_year = urlDate.substring(0, 4);
-        let q_month = ['01', '04', '07', '10'][Number(urlDate[6]) - 1];
-        reportDate = `${q_year}-${q_month}-01`;
-        break;
-    // YYYY-JAN, YYYY-FEB, ..., YYYY-DEC
-    case 8:
-        reportType = 'monthly';
-        let m_year = urlDate.substring(4);
-        let m_month = {
-            'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
-            'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
-            'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
-        }[urlDate.substring(5, 8).toUpperCase()];
-        reportDate = `${m_year}-${m_month}-01`;
-        break;
-    // yyyy-mm-dd
-    case 10:
-        reportType = 'daily';
-        reportDate = urlDate;
-        break;
-    // week-yyyy-mm-dd
-    case 15:
-        reportType = 'weekly';
-        reportDate = urlDate.substring('week-'.length);
-        break;
-    default: alert(`Invalid date format: ${urlDate}`);
-}
+let [reportType, reportDate] = [getReportType(urlDate), getReportStartDate(urlDate)];
 if (reportType == null || reportDate == null) {
     alert(`Invalid date format: ${urlDate}`);
     throw new Error(`Invalid date format: ${urlDate}`);
@@ -355,10 +354,10 @@ if (reportType == null || reportDate == null) {
 
 window.currentReport = null;
 switch (reportType) {
-    case 'daily': window.currentReport = await getDailyReport(reportDate); break;
-    case 'weekly': window.currentReport = await getWeeklyReport(reportDate);break;
-    case 'monthly': window.currentReport = await getMonthlyReport(reportDate); break;
-    case 'quarterly': window.currentReport = await getQuarterlyReport(reportDate); break;
+    case 'daily': window.currentReport = await getDailyReport(urlDate); break;
+    case 'weekly': window.currentReport = await getWeeklyReport(urlDate);break;
+    case 'monthly': window.currentReport = await getMonthlyReport(urlDate); break;
+    case 'quarterly': window.currentReport = await getQuarterlyReport(urlDate); break;
     default: alert(`Report type ${reportType} not supported`); break;
 }
 
@@ -418,6 +417,14 @@ let tests = () => {
     console.assert(getInclusiveRange('2024-01-01', 'quarterly')[0] === '2024-01-01 00:00:00', 'getInclusiveRange quarterly .start failed');
     console.assert(getInclusiveRange('2024-01-01', 'quarterly')[1] === '2024-03-31 23:59:59', 'getInclusiveRange quarterly .end failed');
     console.assert(getInclusiveRange('2024-04-01', 'quarterly')[1] === '2024-06-31 23:59:59', 'getInclusiveRange quarterly .end failed');
+    console.assert(getReportType('2024-11-05') === 'daily', 'getReportType daily failed');
+    console.assert(getReportType('week-2024-11-05') === 'weekly', 'getReportType weekly failed');
+    console.assert(getReportType('2024-feb') === 'monthly', 'getReportType monthly failed');
+    console.assert(getReportType('2024-Q1') === 'quarterly', 'getReportType quarterly failed');
+    console.assert(getReportStartDate('2024-11-05') === '2024-11-05', 'getReportStartDate daily failed');
+    console.assert(getReportStartDate('week-2024-11-05') === '2024-11-05', 'getReportStartDate weekly failed');
+    console.assert(getReportStartDate('2024-feb') === '2024-02-01', 'getReportStartDate monthly failed');
+    console.assert(getReportStartDate('2024-Q2') === '2024-04-01', 'getReportStartDate quarterly failed');
 };
 tests();
 
