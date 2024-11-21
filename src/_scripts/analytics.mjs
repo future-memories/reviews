@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, getCountFromServer, setDoc, and, doc, collection, query, where, orderBy, limit, getDoc, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, setDoc, doc, collection, query, where, orderBy, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 try {
 let $ = (selector) => document.querySelector(selector);
@@ -26,6 +26,16 @@ const reviewDB = getFirestore(initializeApp({
     measurementId: "G-DN5NWXVX7N"
 }, "fm-reviews"));
 
+let date2iso = (date) => {
+    let year = date.getFullYear();
+    let month = (date.getMonth() + 1).toString().padStart(2, '0');
+    let day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+let iso2date = (isoDate) => {
+    let [year, month, day] = isoDate.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
 let _time = Date.now();
 
 // rought approximation, consider using the google maps API with the precise coordinates of each memory
@@ -101,6 +111,13 @@ let getTimeZoneDiff = (country) => timeZoneDiff[country] || 0;
 // -> timegraph: list of
 //   -> index = hour of day
 //   -> value = count memories withing this hour (in the respective country TZ ~approx)
+// -> <for weekly & monthly reports only>:
+//   -> accumulated data of daily timegraphs
+// -> <for weekly reports only>:
+//   -> graph for day of week
+// -> <for monthly reports only>:
+//   -> graph for day of month
+//   -> accumulate graph for day of week
 
 // cell managers reports
 // per user:
@@ -188,7 +205,7 @@ let getDailyReport = async (dateISO) => {
         report.timegraph.push({ i, count });
     }
 
-    let todayDate = (new Date()).toISOString().split('T')[0];
+    let todayDate = date2iso(new Date());
     if (dateISO >= todayDate) return report;
 
     try {
@@ -200,11 +217,30 @@ let getDailyReport = async (dateISO) => {
     }
 };
 
-let getCountryChart = (bestFirst = true) => {
-    let labels = window.dailyReport.countries.map(c => c.country);
-    let data = window.dailyReport.countries.map(c => c.count);
-    data = bestFirst ? data.slice(0, 10) : data.slice(-10).reverse();
-    labels = bestFirst ? labels.slice(0, 10) : labels.slice(-10).reverse();
+let getWeeklyReport = async (dateISO) => {
+    alert("Weekly reports are not supported yet");
+    throw new Error("Weekly reports are not supported yet");
+}
+
+let getMonthlyReport = async (dateISO) => {
+    alert("Monthly reports are not supported yet");
+    throw new Error("Monthly reports are not supported yet");
+}
+
+let getQuarterlyReport = async (dateISO) => {
+    alert("Quarterly reports are not supported yet");
+    throw new Error("Quarterly reports are not supported yet");
+}
+
+// --- charts
+
+let getCountryChart = (bestFirst = true, showOnlyTen = true) => {
+    let data = window.currentReport.countries.map(c => c.count);
+    data = showOnlyTen ? data.slice(0, 10) : data;
+    data = bestFirst ? data : data.reverse();
+    let labels = window.currentReport.countries.map(c => c.country);
+    labels = showOnlyTen ? labels.slice(0, 10) : labels;
+    labels = bestFirst ? labels : labels.reverse();
     return {
         type: 'bar',
         data: {
@@ -226,11 +262,13 @@ let getCountryChart = (bestFirst = true) => {
     };
 };
 
-let getUsersChart = (bestFirst = true) => {
-    let data = window.dailyReport.users.map(u => u.count);
-    let labels = window.dailyReport.users.map(u => fm(u.user));
-    data = bestFirst ? data.slice(0, 10) : data.slice(-10).reverse();
-    labels = bestFirst ? labels.slice(0, 10) : labels.slice(-10).reverse();
+let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
+    let data = window.currentReport.users.map(u => u.count);
+    data = showOnlyTen ? data.slice(0, 10) : data;
+    data = bestFirst ? data : data.reverse();
+    let labels = window.currentReport.users.map(u => fm(u.user));
+    labels = showOnlyTen ? labels.slice(0, 10) : labels;
+    labels = bestFirst ? labels : labels.reverse();
 
     return {
         type: 'bar',
@@ -254,8 +292,8 @@ let getUsersChart = (bestFirst = true) => {
 };
 
 let getActivityChart = () => {
-    let labels = window.dailyReport.timegraph.map(t => t.i);
-    let data = window.dailyReport.timegraph.map(t => t.count);
+    let labels = window.currentReport.timegraph.map(t => t.i);
+    let data = window.currentReport.timegraph.map(t => t.count);
     return {
         type: 'line',
         data: {
@@ -276,35 +314,127 @@ let getActivityChart = () => {
     };
 };
 
-// let yesterday = (new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
-let today = (new Date()).toISOString().split('T')[0];
-let reportDate = url.get('date') || today;
-window.dailyReport = await getDailyReport(reportDate);
+// TODO: test this switch expression
+let [reportType, reportDate] = [null, null];
+let urlDate = url.get('date');
+switch (urlDate.length) {
+    // YYYY-Q1, YYYY-Q2, YYYY-Q3, YYYY-Q4
+    case 7:
+        reportType = 'quarterly';
+        let q_year = urlDate.substring(0, 4);
+        let q_month = ['01', '04', '07', '10'][Number(urlDate[6]) - 1];
+        reportDate = `${q_year}-${q_month}-01`;
+        break;
+    // YYYY-JAN, YYYY-FEB, ..., YYYY-DEC
+    case 8:
+        reportType = 'monthly';
+        let m_year = urlDate.substring(4);
+        let m_month = {
+            'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
+            'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
+            'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12',
+        }[urlDate.substring(5, 8).toUpperCase()];
+        reportDate = `${m_year}-${m_month}-01`;
+        break;
+    // yyyy-mm-dd
+    case 10:
+        reportType = 'daily';
+        reportDate = urlDate;
+        break;
+    // week-yyyy-mm-dd
+    case 15:
+        reportType = 'weekly';
+        reportDate = urlDate.substring('week-'.length);
+        break;
+    default: alert(`Invalid date format: ${urlDate}`);
+}
+if (reportType == null || reportDate == null) {
+    alert(`Invalid date format: ${urlDate}`);
+    throw new Error(`Invalid date format: ${urlDate}`);
+}
 
+window.currentReport = null;
+switch (reportType) {
+    case 'daily': window.currentReport = await getDailyReport(reportDate); break;
+    case 'weekly': window.currentReport = await getWeeklyReport(reportDate);break;
+    case 'monthly': window.currentReport = await getMonthlyReport(reportDate); break;
+    case 'quarterly': window.currentReport = await getQuarterlyReport(reportDate); break;
+    default: alert(`Report type ${reportType} not supported`); break;
+}
 
-// TODO list:
-// better vis
+// fallthrough switch
+let drawCharts = (reportType) => {
+    switch (reportType) {
+        case 'quarterly':
+            // TODO: per-month timegraph
+        case 'monthly':
+            // TODO: per-day timegraph - accumulate if quarterly
+        case 'weekly':
+            // TODO: per-weekday timegraph - accumulate if monthly/quarterly
+        case 'daily':
+            new Chart($('section#countries-top > canvas'), getCountryChart(true));
+            new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
+            new Chart($('section#users-top > canvas'), getUsersChart(true));
+            new Chart($('section#users-bottom > canvas'), getUsersChart(false));
+            new Chart($('section#activity > canvas'), getActivityChart()); // accumulate if weekly/monthly/quarterly
+            break;
+    }
+};
 
-// store all users, show only few of them
-// top 20 users (highlight which have reviews on)
-// bottom 20 users (highlight which have reviews on) (with at least one memory from period)
+// used for UI display only
+let getInclusiveRange = (reportDate, reportType) => {
+    switch (reportType) {
+        case 'daily': return [`${reportDate} 00:00:00`, `${reportDate} 23:59:59`];
+        case 'weekly':
+            let weekEnd = new Date(iso2date(reportDate).getTime() + 7 * 24 * 60 * 60 * 1000);
+            return [reportDate, date2iso(weekEnd)];
+        case 'monthly':
+            // https://stackoverflow.com/questions/222309/calculate-last-day-of-month
+            let monthStart = iso2date(reportDate);
+            let monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+            return [`${date2iso(monthStart)} 00:00:00`, `${date2iso(monthEnd)} 23:59:59`];
+        case 'quarterly':
+            let quarterStart = iso2date(reportDate);
+            let quarterEnd = new Date(quarterStart.getFullYear(), quarterStart.getMonth() + 3, 0);
+            return [`${date2iso(quarterStart)} 00:00:00`, `${date2iso(quarterEnd)} 23:59:59`];
+    }
+}
 
-// weekly reports
-// monthly reports -> store
-
+let tests = () => {
+    console.assert(date2iso(new Date(2024, 10, 5)) === '2024-11-05', 'date2iso failed');
+    console.assert(iso2date('2024-11-05').getTime() === new Date(2024, 10, 5).getTime(), 'iso2date failed');
+    console.assert(date2iso(iso2date('2024-11-05')) === '2024-11-05', 'date2iso -> iso2date failed');
+    console.assert(date2iso(iso2date('2024-02-30')) === '2024-03-01', 'date2iso -> iso2date failed (2)');
+    console.assert(getTimeZoneDiff("Spain") === 1, 'getTimeZoneDiff failed');
+    console.assert(getTimeZoneDiff("United States") === -8, 'getTimeZoneDiff failed (2)');
+    console.assert(getInclusiveRange('2024-11-05', 'daily')[0] === '2024-11-05 00:00:00', 'getInclusiveRange daily .start failed');
+    console.assert(getInclusiveRange('2024-11-05', 'daily')[1] === '2024-11-05 23:59:59', 'getInclusiveRange daily .end failed');
+    console.assert(getInclusiveRange('2024-01-01', 'weekly')[0] === '2024-01-01 00:00:00', 'getInclusiveRange weekly .start failed');
+    console.assert(getInclusiveRange('2024-01-01', 'weekly')[1] === '2024-01-07 23:59:59', 'getInclusiveRange weekly .end failed');
+    console.assert(getInclusiveRange('2024-03-01', 'monthly')[0] === '2024-03-01', 'getInclusiveRange monthly .start failed');
+    console.assert(getInclusiveRange('2024-03-01', 'monthly')[1] === '2024-03-31 23:59:59', 'getInclusiveRange monthly .end failed');
+    console.assert(getInclusiveRange('2024-02-01', 'monthly')[1] === '2024-02-29 23:59:59', 'getInclusiveRange monthly .end failed (2)');
+    console.assert(getInclusiveRange('2024-12-01', 'monthly')[1] === '2024-12-31 23:59:59', 'getInclusiveRange monthly .end failed (3)');
+    console.assert(getInclusiveRange('2024-01-01', 'quarterly')[0] === '2024-01-01 00:00:00', 'getInclusiveRange quarterly .start failed');
+    console.assert(getInclusiveRange('2024-01-01', 'quarterly')[1] === '2024-03-31 23:59:59', 'getInclusiveRange quarterly .end failed');
+    console.assert(getInclusiveRange('2024-04-01', 'quarterly')[1] === '2024-06-31 23:59:59', 'getInclusiveRange quarterly .end failed');
+};
+tests();
 
 let onLoad = () => {
     $('body').style = '';
     $('#spinner').remove();
 
-    new Chart($('section#countries-top > canvas'), getCountryChart(true));
-    new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
-    new Chart($('section#users-top > canvas'), getUsersChart(true));
-    new Chart($('section#users-bottom > canvas'), getUsersChart(false));
-    new Chart($('section#activity > canvas'), getActivityChart());
+    drawCharts(reportType);
 
-    $('h2.title').innerText = `Report for ${reportDate}`;
-    $('h2.title + p').innerText = `Includes all memories from ${reportDate} 00:00:00 to ${reportDate} 23:59:59 UTC`;
+    switch (reportType) {
+        case 'daily': $('h2.title').innerText = `Daily report for ${reportDate}`; break;
+        case 'weekly': $('h2.title').innerText = `Weekly report for ${reportDate}`; break;
+        case 'monthly': $('h2.title').innerText = `Monthly report for ${urlDate}`; break;
+        case 'quarterly': $('h2.title').innerText = `Report for ${urlDate}`; break;
+    }
+    let [rangeStart, rangeEnd] = getInclusiveRange(reportDate, reportType);
+    $('h2.title + p').innerText = `Includes all memories from ${rangeStart} to ${rangeEnd} UTC`;
     $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
 
     $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
@@ -319,8 +449,6 @@ if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
 } else {
     document.addEventListener("DOMContentLoaded", onLoad);
 }
-
-
 
 // -----------------
 } catch (error) {

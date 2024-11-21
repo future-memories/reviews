@@ -21,5 +21,6 @@ docs: https://firebase.google.com/docs/firestore/manage-data/add-data
 - [ ] move to new firebase project (but maybe we want the terraform here now)
 - [ ] UI/UX
   - [ ] usernames should be links (clickable)
+  - [ ] higlight users with reviews on & date of latest review, images since last review
   - [ ] countries should be clickable -> go to cell manager's page
   - [ ] periods for 1 week, 1 month, 3 months
