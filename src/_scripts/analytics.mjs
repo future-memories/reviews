@@ -139,7 +139,7 @@ let getReportStartDate = (input) => {
             let q_month = ['01', '04', '07', '10'][Number(input[6]) - 1];
             return `${q_year}-${q_month}-01`;
         case 8:
-            let m_year = input.substring(4);
+            let m_year = input.substring(0, 4);
             let m_month = {
                 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04',
                 'MAY': '05', 'JUN': '06', 'JUL': '07', 'AUG': '08',
@@ -182,7 +182,7 @@ let getDailyReport = async (input) => {
     try {
         let q = query(
             collection(fmDB, "memory"),
-            where("timestamp", ">=", date),
+            where("timestamp", ">=", iso2date(input)),
             where("timestamp", "<", new Date(iso2date(input).getTime() + 24 * 60 * 60 * 1000)),
             orderBy("timestamp", "desc")
         );
@@ -345,7 +345,7 @@ let getActivityChart = () => {
     };
 };
 
-let urlDate = url.get('date');
+let urlDate = url.get('date') || date2iso(new Date());
 let [reportType, reportDate] = [getReportType(urlDate), getReportStartDate(urlDate)];
 if (reportType == null || reportDate == null) {
     alert(`Invalid date format: ${urlDate}`);
@@ -386,7 +386,7 @@ let getInclusiveRange = (reportDate, reportType) => {
         case 'daily': return [`${reportDate} 00:00:00`, `${reportDate} 23:59:59`];
         case 'weekly':
             let weekEnd = new Date(iso2date(reportDate).getTime() + 7 * 24 * 60 * 60 * 1000);
-            return [reportDate, date2iso(weekEnd)];
+            return [`${reportDate} 00:00:00`, `${date2iso(weekEnd)} 23:59:59`];
         case 'monthly':
             // https://stackoverflow.com/questions/222309/calculate-last-day-of-month
             let monthStart = iso2date(reportDate);
@@ -398,6 +398,8 @@ let getInclusiveRange = (reportDate, reportType) => {
             return [`${date2iso(quarterStart)} 00:00:00`, `${date2iso(quarterEnd)} 23:59:59`];
     }
 }
+window.getInclusiveRange = getInclusiveRange;
+window.getReportStartDate = getReportStartDate;
 
 let tests = () => {
     console.assert(date2iso(new Date(2024, 10, 5)) === '2024-11-05', 'date2iso failed');
@@ -409,14 +411,14 @@ let tests = () => {
     console.assert(getInclusiveRange('2024-11-05', 'daily')[0] === '2024-11-05 00:00:00', 'getInclusiveRange daily .start failed');
     console.assert(getInclusiveRange('2024-11-05', 'daily')[1] === '2024-11-05 23:59:59', 'getInclusiveRange daily .end failed');
     console.assert(getInclusiveRange('2024-01-01', 'weekly')[0] === '2024-01-01 00:00:00', 'getInclusiveRange weekly .start failed');
-    console.assert(getInclusiveRange('2024-01-01', 'weekly')[1] === '2024-01-07 23:59:59', 'getInclusiveRange weekly .end failed');
-    console.assert(getInclusiveRange('2024-03-01', 'monthly')[0] === '2024-03-01', 'getInclusiveRange monthly .start failed');
+    console.assert(getInclusiveRange('2024-01-01', 'weekly')[1] === '2024-01-08 23:59:59', 'getInclusiveRange weekly .end failed');
+    console.assert(getInclusiveRange('2024-03-01', 'monthly')[0] === '2024-03-01 00:00:00', 'getInclusiveRange monthly .start failed');
     console.assert(getInclusiveRange('2024-03-01', 'monthly')[1] === '2024-03-31 23:59:59', 'getInclusiveRange monthly .end failed');
     console.assert(getInclusiveRange('2024-02-01', 'monthly')[1] === '2024-02-29 23:59:59', 'getInclusiveRange monthly .end failed (2)');
     console.assert(getInclusiveRange('2024-12-01', 'monthly')[1] === '2024-12-31 23:59:59', 'getInclusiveRange monthly .end failed (3)');
     console.assert(getInclusiveRange('2024-01-01', 'quarterly')[0] === '2024-01-01 00:00:00', 'getInclusiveRange quarterly .start failed');
     console.assert(getInclusiveRange('2024-01-01', 'quarterly')[1] === '2024-03-31 23:59:59', 'getInclusiveRange quarterly .end failed');
-    console.assert(getInclusiveRange('2024-04-01', 'quarterly')[1] === '2024-06-31 23:59:59', 'getInclusiveRange quarterly .end failed');
+    console.assert(getInclusiveRange('2024-04-01', 'quarterly')[1] === '2024-06-30 23:59:59', 'getInclusiveRange quarterly .end failed');
     console.assert(getReportType('2024-11-05') === 'daily', 'getReportType daily failed');
     console.assert(getReportType('week-2024-11-05') === 'weekly', 'getReportType weekly failed');
     console.assert(getReportType('2024-feb') === 'monthly', 'getReportType monthly failed');
