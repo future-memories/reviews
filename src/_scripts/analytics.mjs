@@ -574,6 +574,11 @@ let onLoad = () => {
     $('#loading').remove();
     $('main').style = '';
 
+    // hide weekday reports
+    switch(reportType) {
+        case 'daily': $('section#weekday').style.display = 'none'; break;
+    }
+
     drawCharts(reportType);
 
     switch (reportType) {
