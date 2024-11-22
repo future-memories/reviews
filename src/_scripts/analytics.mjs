@@ -297,14 +297,14 @@ let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
     let data = window.currentReport.users.map(u => u.count);
     data = showOnlyTen ? data.slice(0, 10) : data;
     data = bestFirst ? data : data.reverse();
-    let labels = window.currentReport.users.map(u => fm(u.user));
-    labels = showOnlyTen ? labels.slice(0, 10) : labels;
-    labels = bestFirst ? labels : labels.reverse();
+    let userIds = window.currentReport.users.map(u => u.user);
+    userIds = showOnlyTen ? userIds.slice(0, 10) : userIds;
+    userIds = bestFirst ? userIds : userIds.reverse();
 
     return {
         type: 'bar',
         data: {
-            labels,
+            labels: userIds.map(u => fm(u)),
             datasets: [{
                 label: 'Memory Count by User',
                 data,
@@ -321,9 +321,6 @@ let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
             // make the bars clickable to user's profile
             onClick: (_event, elements) => {
                 if (elements.length > 0) {
-                    let userIds = window.currentReport.users.map(u => u.user);
-                    userIds = showOnlyTen ? userIds.slice(0, 10) : userIds;
-                    userIds = bestFirst ? userIds : userIds.reverse();
                     let userId = userIds[elements[0].index];
                     window.location.href = `https://explorer.futurememory.app/user/${userId}`;
                 }
