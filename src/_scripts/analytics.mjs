@@ -132,6 +132,7 @@ let getReportType = (input) => {
         default: alert(`Invalid date format: ${input}`);
     }
 };
+
 let getReportStartDate = (input) => {
     switch (input.length) {
         case 7:
@@ -154,6 +155,11 @@ let getReportStartDate = (input) => {
     }
 };
 
+let setLoadingStatus = (status) => {
+    console.log(status);
+    $('p#loading-info').innerText = status;
+};
+
 let getDailyReport = async (input) => {
     console.assert(input.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid date, expected ISO format");
     let reportId = `daily-${input}`;
@@ -166,7 +172,7 @@ let getDailyReport = async (input) => {
     } catch (error) {
         console.log(error);
     }
-    console.log(`daily report for ${input} not found, generating...`);
+    setLoadingStatus(`Daily report for ${input} not found, generating...`);
 
     let report = {
         id: reportId,
@@ -240,7 +246,7 @@ let getDailyReport = async (input) => {
 
     try {
         await setDoc(dailyRef, report);
-        console.log(`daily report for ${input} generated and saved`);
+        setLoadingStatus(`Daily report for ${input} generated and saved`);
         return report;
     } catch (error) {
         console.error(error);
@@ -261,7 +267,7 @@ let getWeeklyReport = async (input) => {
     } catch (error) {
         console.log(error);
     }
-    console.log(`weekly report for ${date} not found, generating...`);
+    setLoadingStatus(`Weekly report for ${date} not found, generating...`);
 
     let dailyReports = [];
     for (let i = 0; i < 7; i++) {
@@ -337,11 +343,12 @@ let getWeeklyReport = async (input) => {
     }
 
     if (date2iso(new Date()) <= date) {
+        setLoadingStatus(`Weekly report for ${date} is incomplete.`);
         alert(`NOTE: Weekly report for ${date} is incomplete.`);
     } else {
         try {
             await setDoc(weeklyRef, report);
-            console.log(`weekly report for ${date} generated and saved`);
+            setLoadingStatus(`Weekly report for ${date} generated and saved`);
         } catch (error) {
             console.error(error);
         }
@@ -562,8 +569,10 @@ let tests = () => {
 tests();
 
 let onLoad = () => {
+    // remove loader & style overrides
     $('body').style = '';
-    $('#spinner').remove();
+    $('#loading').remove();
+    $('main').style = '';
 
     drawCharts(reportType);
 

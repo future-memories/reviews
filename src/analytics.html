@@ -11,10 +11,16 @@
     <script defer src="_scripts/analytics.mjs" type="module"></script>
 </head>
 
-<body style="display: grid; min-height: 80vh; place-items: center;">
-    <img id="spinner"
-        src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif">
-    <main>
+<body style="display: grid; min-height: 90vh; place-items: center;">
+    <section id="loading" style="margin-inline: auto;">
+        <h1>Loading...</h1>
+        <img id="spinner"
+            src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNW93ajF5dWJldmd5aTB0eXRoNnY0OTIxbWRwMjI0bnFuZmd0YnlibSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEjI6SIIHBdRxXI40/giphy.gif"
+            width="256" height="256">
+        <p id="loading-info"></p>
+    </section>
+
+    <main style="display: none;">
         <header>
             <h1>FM Analytics</h1>
 
