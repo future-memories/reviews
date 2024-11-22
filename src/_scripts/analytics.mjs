@@ -175,7 +175,6 @@ let getDailyReport = async (input) => {
         countries: [],
         users: [],
         timegraph: [],
-        relativeTimegraph: null,
     };
 
     let memories = [];
@@ -249,8 +248,106 @@ let getDailyReport = async (input) => {
 };
 
 let getWeeklyReport = async (input) => {
-    alert("Weekly reports are not supported yet");
-    // throw new Error("Weekly reports are not supported yet");
+    console.assert(input.match(/^week-\d{4}-\d{2}-\d{2}$/), "Invalid weekly report format, expected week-<isoDate>");
+    let date = input.substring('week-'.length);
+
+    let reportId = `weekly-${date}`;
+    let weeklyRef = doc(reviewDB, "analytics", reportId);
+    try {
+        let snapshot = await getDoc(weeklyRef);
+        if (snapshot.exists()) {
+            return snapshot.data();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+    console.log(`weekly report for ${date} not found, generating...`);
+
+    let dailyReports = [];
+    for (let i = 0; i < 7; i++) {
+        let weekStart = iso2date(date);
+        let weekIndex = date2iso(new Date(weekStart.getUTCFullYear(), weekStart.getUTCMonth(), weekStart.getUTCDate() + i));
+        dailyReports.push(await getDailyReport(weekIndex));
+    }
+
+    let report = {
+        id: `weekly-${date}`,
+        type: "weekly",
+        timestamp: iso2date(input).getTime(),
+        countries: [],
+        users: [],
+        timegraph: [],
+        weekdayGraph: [1, 2, 3, 4, 5, 6, 7].map(i => ({ i, count: 0 })),
+    };
+
+    // accumulate country counts & city counts
+    let countryReports = dailyReports.flatMap(d => d.countries);
+    let total = countryReports.reduce((acc, c) => acc + c.count, 0);
+    let distinctCountries = [...new Set(countryReports.map(c => c.country))];
+    for (let country of distinctCountries) {
+        let thisCountryReports = countryReports.filter(c => c.country === country);
+        let count = thisCountryReports.reduce((acc, c) => acc + c.count, 0);
+        let cityReports = thisCountryReports.flatMap(c => c.cities);
+        let distinctCities = [...new Set(cityReports.map(c => c.city))];
+
+        let weeklyCityReport = [];
+        for (let city of distinctCities) {
+            let cityCount = cityReports.filter(c => c.city === city).reduce((acc, c) => acc + c.count, 0);
+            weeklyCityReport.push({
+                city,
+                count: cityCount,
+                percentage: cityCount / count * 100
+            });
+        }
+        weeklyCityReport.sort((a, b) => b.count - a.count);
+
+        report.countries.push({
+            country,
+            count,
+            percentage: count / total * 100,
+            cities: weeklyCityReport,
+        });
+    }
+    report.countries.sort((a, b) => b.count - a.count);
+
+    // accumulate user counts
+    let userReports = dailyReports.flatMap(d => d.users);
+    let distinctUsers = [...new Set(userReports.map(u => u.user))];
+    for (let user of distinctUsers) {
+        let count = userReports.filter(u => u.user === user).reduce((acc, u) => acc + u.count, 0);
+        report.users.push({ user, count });
+    }
+    report.users.sort((a, b) => b.count - a.count);
+
+    // accumulate timegraph
+    let timegraphs = dailyReports.map(d => d.timegraph);
+    for (let i = 0; i < 24; i++) {
+        let count = timegraphs.reduce((acc, t) => acc + t[i].count, 0);
+        report.timegraph.push({ i, count });
+    }
+
+    // weekday graph (starts from Monday)
+    // shift based on which day of the week the weekly report is from
+    // if the date is Wednesday, i = 0 is Wednesday, so we need to save it in report.weekdayGraph[2] (because Wednesday = 2)
+    let dayOfWeek = iso2date(date).getUTCDay();
+    let weekdayReports = dailyReports.map(d => d.users.map(u => u.count).reduce((acc, c) => acc + c, 0));
+    console.log(weekdayReports)
+    for (let i = 0; i < weekdayReports.length; i++) {
+        report.weekdayGraph[(dayOfWeek + i) % 7].count = weekdayReports[i];
+    }
+
+    if (date2iso(new Date()) <= date) {
+        alert(`NOTE: Weekly report for ${date} is incomplete.`);
+    } else {
+        try {
+            await setDoc(weeklyRef, report);
+            console.log(`weekly report for ${date} generated and saved`);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    return report;
 }
 
 let getMonthlyReport = async (input) => {
@@ -352,6 +449,29 @@ let getActivityChart = () => {
     };
 };
 
+let getWeekdayChart = () => {
+    let labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let data = window.currentReport.weekdayGraph.map(t => t.count);
+    return {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Memory Count by Weekday',
+                data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: { beginAtZero: true },
+            }
+        }
+    };
+}
+
 let urlDate = url.get('date') || date2iso(new Date());
 let [reportType, reportDate] = [getReportType(urlDate), getReportStartDate(urlDate)];
 if (reportType == null || reportDate == null) {
@@ -362,7 +482,7 @@ if (reportType == null || reportDate == null) {
 window.currentReport = null;
 switch (reportType) {
     case 'daily': window.currentReport = await getDailyReport(urlDate); break;
-    case 'weekly': window.currentReport = await getWeeklyReport(urlDate);break;
+    case 'weekly': window.currentReport = await getWeeklyReport(urlDate); break;
     case 'monthly': window.currentReport = await getMonthlyReport(urlDate); break;
     case 'quarterly': window.currentReport = await getQuarterlyReport(urlDate); break;
     default: alert(`Report type ${reportType} not supported`); break;
@@ -379,7 +499,8 @@ let drawCharts = (reportType) => {
             break;
         case 'weekly':
             // TODO: per-weekday timegraph - accumulate if monthly/quarterly
-            break;
+            // weekday chart
+            new Chart($('section#weekday > canvas'), getWeekdayChart());
         case 'daily':
             new Chart($('section#countries-top > canvas'), getCountryChart(true));
             new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
