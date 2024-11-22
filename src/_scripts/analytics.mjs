@@ -317,8 +317,18 @@ let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
             indexAxis: 'y',
             scales: {
                 x: { beginAtZero: true },
+            },
+            // make the bars clickable to user's profile
+            onClick: (_event, elements) => {
+                if (elements.length > 0) {
+                    let userIds = window.currentReport.users.map(u => u.user);
+                    userIds = showOnlyTen ? userIds.slice(0, 10) : userIds;
+                    userIds = bestFirst ? userIds : userIds.reverse();
+                    let userId = userIds[elements[0].index];
+                    window.location.href = `https://explorer.futurememory.app/user/${userId}`;
+                }
             }
-        }
+        },
     };
 };
 
