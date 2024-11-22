@@ -142,14 +142,13 @@ let getLastReviewTime = async (userId) => {
       let documentIds = querySnapshot.docs.map(doc => doc.id).sort((a, b) => {
         let aSeconds = a.split('-').pop();
         let bSeconds = b.split('-').pop();
-        console.log(aSeconds, bSeconds);
         return Number(bSeconds) - Number(aSeconds);
       });
 
       if (documentIds.length > 0) {
         return Number(documentIds[0].split('-').pop());
       } else {
-        throw new Error(`[W]No memories found for user "${userId}"`);
+        throw new Error(`[W]No reviews found for user "${userId}"`);
       }
     } catch (error) {
       let isWarning = error.message.startsWith("[W]");
@@ -472,6 +471,7 @@ let getCityChart = (country, bestFirst = true, showOnlyTen = true) => {
     };
 };
 
+let reviewsCache = {};
 let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
     let data = window.currentReport.users.map(u => u.count);
     data = showOnlyTen ? data.slice(0, 10) : data;
@@ -502,6 +502,24 @@ let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
                 if (elements.length > 0) {
                     let userId = userIds[elements[0].index];
                     window.location.href = `https://explorer.futurememory.app/user/${userId}`;
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            let userId = window.currentReport.users.map(u => u.user)[context.dataIndex];
+                            if (reviewsCache[userId] == null) {
+                                getMemoriesSinceLastReview(userId).then(count => {
+                                    reviewsCache[userId] = count == null ? 'none' : count;
+                                    context.chart.tooltip.update(); // Trigger tooltip redraw
+                                });
+                                return `${context.dataset.label}: ${context.raw} (Loading...)`;
+                            }
+                            let msg = reviewsCache[userId] == 'none' ? 'No review' : `${reviewsCache[userId]} memories since last review`;
+                            return `${context.dataset.label}: ${context.raw} (${msg})`;
+                        }
+                    }
                 }
             }
         },
@@ -561,6 +579,7 @@ if (reportType == null || reportDate == null) {
     throw new Error(`Invalid date format: ${urlDate}`);
 }
 
+// fetch the report
 window.currentReport = null;
 switch (reportType) {
     case 'daily': window.currentReport = await getDailyReport(urlDate); break;
@@ -584,13 +603,12 @@ let drawCharts = (reportType) => {
             // weekday chart
             new Chart($('section#weekday > canvas'), getWeekdayChart());
         case 'daily':
-            new Chart($('section#users-top > canvas'), getUsersChart(true));
-            new Chart($('section#users-bottom > canvas'), getUsersChart(false));
+            new Chart($('section#users-top > canvas'), getUsersChart(true, url.get('country') == null));
             new Chart($('section#activity > canvas'), getActivityChart()); // accumulate if weekly/monthly/quarterly
             if (url.get('country') != null) {
                 new Chart($('section#cities-top > canvas'), getCityChart(url.get('country'), true));
-                new Chart($('section#cities-bottom > canvas'), getCityChart(url.get('country'), false));
             } else {
+                new Chart($('section#users-bottom > canvas'), getUsersChart(false));
                 new Chart($('section#countries-top > canvas'), getCountryChart(true));
                 new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
             }
@@ -662,15 +680,16 @@ let onLoad = () => {
             if (url.get('country') != null) {
                 $('section#countries-top').remove()
                 $('section#countries-bottom').remove()
+                $('section#users-bottom').remove()
             } else {
                 $('section#cities-top').remove();
-                $('section#cities-bottom').remove();
             }
             break;
     }
 
     drawCharts(reportType);
 
+    // set the title
     switch (reportType) {
         case 'daily': $('h2.title').innerText = `Daily report for ${reportDate}`; break;
         case 'weekly': $('h2.title').innerText = `Weekly report for ${reportDate}`; break;
@@ -690,8 +709,13 @@ let onLoad = () => {
     }
     let [rangeStart, rangeEnd] = getInclusiveRange(reportDate, reportType);
     $('h2.title + p').innerText = `Includes all memories from ${rangeStart} to ${rangeEnd} UTC`;
-    $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
+    // modify title if country filter is applied
+    if (url.get('country') != null) {
+        $('h2.title').innerText = `[${url.get('country')}] ` + $('h2.title').innerText;
+        $('h2.title + p').innerText += ` captured in ${url.get('country')}`;
+    }
 
+    // TODO: check the value of the country filter
     $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
         e.preventDefault();
         let date = $('form#datePicker > input[type="date"]').value;
@@ -712,6 +736,8 @@ let onLoad = () => {
         console.log(year, quarter);
         window.location.href = `?date=${year}-${quarter}`;
     });
+
+    $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
 };
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
