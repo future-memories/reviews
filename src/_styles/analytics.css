@@ -3,24 +3,35 @@ body { margin: 1rem; }
 main {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr 1fr 1fr;
+    grid-template-rows: auto auto 1fr 1fr 1fr;
     gap: 0.5rem;
     margin-inline: 2rem;
     grid-template-areas: "header header"
+                         "nav nav"
                          "countries-top countries-bottom"
                          "users-top users-bottom"
-                         "activity temp-nav";
+                         "activity .";
 }
 header { grid-area: header; }
+nav { grid-area: nav; }
 section#countries-top { grid-area: countries-top; }
 section#countries-bottom { grid-area: countries-bottom; }
 section#users-top { grid-area: users-top; }
 section#users-bottom { grid-area: users-bottom; }
 section#activity { grid-area: activity; }
-section#temp-nav { grid-area: temp-nav; }
 main > * { border: 1px solid silver; border-radius: 4px; padding: 1rem; }
 footer { margin-top: 2rem; color: silver; }
 
 /* title & summary */
 h2.title { margin-bottom: 0.5rem; }
 h2.title + p { margin-top: 0.5rem; color: silver; }
+
+nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding-inline: 1.5rem;
+}
+nav > *:not(:last-child) { border-right: 1px solid silver; margin-right: 2rem; }
+
+form#datePicker > input[type="checkbox"] { margin-top: 0.75rem; }
+section#nav-quarterly > div + div { margin-top: 0.5rem; }

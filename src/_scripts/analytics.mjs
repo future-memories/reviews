@@ -456,8 +456,12 @@ let onLoad = () => {
     $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
         e.preventDefault();
         let date = $('form#datePicker > input[type="date"]').value;
-        window.location.href = `?date=${date}`;
+        let isWeekly = $('form#datePicker > input[type="checkbox"]').checked;
+        console.log(date, isWeekly);
+        // window.location.href = `?date=${date}`;
     });
+    // month picker
+    // quarter picker
 };
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
