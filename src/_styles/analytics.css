@@ -1,17 +1,29 @@
-body { margin: 1rem; }
+body { margin: 0.5rem; }
 
 main {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto repeat(5, 1fr); /* weekday is sometimes not present, define only 5 rows, TODO: make it auto-fill? */
+    grid-template-areas: "header"
+                         "nav"
+                         "countries-top"
+                         "countries-bottom"
+                         "users-top"
+                         "users-bottom"
+                         "activity"
+                         "weekday";
     gap: 0.5rem;
-    margin-inline: 2rem;
-    grid-template-areas: "header header"
-                         "nav nav"
-                         "countries-top countries-bottom"
-                         "users-top users-bottom"
-                         "activity .";
 }
+
+nav {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding-inline: 1.5rem;
+    gap: 1rem;
+}
+nav > section > h1 { margin-top: 0; } /* space available by nav(padding) already */
+nav > *:not(:last-child) { border-bottom: 1px solid silver; padding-bottom: 1rem; }
+
 header { grid-area: header; }
 nav { grid-area: nav; }
 section#countries-top { grid-area: countries-top; }
@@ -19,18 +31,35 @@ section#countries-bottom { grid-area: countries-bottom; }
 section#users-top { grid-area: users-top; }
 section#users-bottom { grid-area: users-bottom; }
 section#activity { grid-area: activity; }
-main > * { border: 1px solid silver; border-radius: 4px; padding: 1rem; }
+section#weekday { grid-area: weekday; }
+main > * { padding: 1rem; }
+main > *:not(header) { border: 1px solid silver; border-radius: 4px; padding: 1rem; }
 footer { margin-top: 2rem; color: silver; }
 
 /* title & summary */
 h2.title { margin-bottom: 0.5rem; }
 h2.title + p { margin-top: 0.5rem; color: silver; }
 
-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    padding-inline: 1.5rem;
-}
-nav > *:not(:last-child) { border-right: 1px solid silver; margin-right: 2rem; }
-
 form#datePicker > input[type="checkbox"] { margin-top: 0.75rem; }
+
+@media screen and (min-width: 768px) {
+    main {
+        margin-inline: 1rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto 1fr 1fr 1fr;
+        grid-template-areas: "header header"
+                             "nav nav"
+                             "countries-top countries-bottom"
+                             "users-top users-bottom"
+                             "activity weekday";
+    }
+
+    nav { grid-template-columns: repeat(3, 1fr); }
+    nav > *:not(:last-child) { border-bottom: none; padding-bottom: 0; } /* reset mobile styles */
+    nav > *:not(:last-child) { border-right: 1px solid silver; } /* set laptop styles */
+}
+
+@media screen and (min-width: 1024px) {
+    body { margin: 1rem; }
+    main { margin-inline: 2rem; }
+}
