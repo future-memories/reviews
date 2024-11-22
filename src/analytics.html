@@ -61,18 +61,19 @@
             </section>
             <section id="nav-quarterly">
                 <h1>Pick a quarter</h1>
-                <div id="q-2024">
-                    <button id="nav-y0-q1">2024 Q1</button>
-                    <button id="nav-y0-q2">2024 Q2</button>
-                    <button id="nav-y0-q3">2024 Q3</button>
-                    <button id="nav-y0-q4">2024 Q4</button>
-                </div>
-                <div id="q-2023">
-                    <button id="nav-y1-q1">2023 Q1</button>
-                    <button id="nav-y1-q2">2023 Q2</button>
-                    <button id="nav-y1-q3">2023 Q3</button>
-                    <button id="nav-y1-q4">2023 Q4</button>
-                </div>
+                <form id="quarterPicker">
+                    <select id="q-year">
+                        <option value="2024" selected>2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                    <select id="q-quarter">
+                        <option value="q1" selected>Q1</option>
+                        <option value="q2">Q2</option>
+                        <option value="q3">Q3</option>
+                        <option value="q4">Q4</option>
+                    </select>
+                    <button type="submit">Submit</button>
+                </form>
             </section>
         </nav>
 

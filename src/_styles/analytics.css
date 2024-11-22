@@ -34,4 +34,3 @@ nav {
 nav > *:not(:last-child) { border-right: 1px solid silver; margin-right: 2rem; }
 
 form#datePicker > input[type="checkbox"] { margin-top: 0.75rem; }
-section#nav-quarterly > div + div { margin-top: 0.5rem; }

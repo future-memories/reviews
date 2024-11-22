@@ -250,17 +250,17 @@ let getDailyReport = async (input) => {
 
 let getWeeklyReport = async (input) => {
     alert("Weekly reports are not supported yet");
-    throw new Error("Weekly reports are not supported yet");
+    // throw new Error("Weekly reports are not supported yet");
 }
 
 let getMonthlyReport = async (input) => {
     alert("Monthly reports are not supported yet");
-    throw new Error("Monthly reports are not supported yet");
+    // throw new Error("Monthly reports are not supported yet");
 }
 
 let getQuarterlyReport = async (input) => {
     alert("Quarterly reports are not supported yet");
-    throw new Error("Quarterly reports are not supported yet");
+    // throw new Error("Quarterly reports are not supported yet");
 }
 
 // --- charts
@@ -373,10 +373,13 @@ let drawCharts = (reportType) => {
     switch (reportType) {
         case 'quarterly':
             // TODO: per-month timegraph
+            break;
         case 'monthly':
             // TODO: per-day timegraph - accumulate if quarterly
+            break;
         case 'weekly':
             // TODO: per-weekday timegraph - accumulate if monthly/quarterly
+            break;
         case 'daily':
             new Chart($('section#countries-top > canvas'), getCountryChart(true));
             new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
@@ -446,8 +449,19 @@ let onLoad = () => {
     switch (reportType) {
         case 'daily': $('h2.title').innerText = `Daily report for ${reportDate}`; break;
         case 'weekly': $('h2.title').innerText = `Weekly report for ${reportDate}`; break;
-        case 'monthly': $('h2.title').innerText = `Monthly report for ${urlDate}`; break;
-        case 'quarterly': $('h2.title').innerText = `Report for ${urlDate}`; break;
+        case 'monthly':
+            let [year, monthSlug] = urlDate.split('-');
+            let month = {
+                'jan': 'January', 'feb': 'February', 'mar': 'March', 'apr': 'April',
+                'may': 'May', 'jun': 'June', 'jul': 'July', 'aug': 'August',
+                'sep': 'September', 'oct': 'October', 'nov': 'November', 'dec': 'December',
+            }[monthSlug];
+            $('h2.title').innerText = `Monthly report for ${month} ${year}`;
+            break;
+        case 'quarterly':
+            let [qYear, quarter] = urlDate.split('-');
+            $('h2.title').innerText = `${quarter.toUpperCase()} report for ${qYear}`;
+            break;
     }
     let [rangeStart, rangeEnd] = getInclusiveRange(reportDate, reportType);
     $('h2.title + p').innerText = `Includes all memories from ${rangeStart} to ${rangeEnd} UTC`;
@@ -457,11 +471,22 @@ let onLoad = () => {
         e.preventDefault();
         let date = $('form#datePicker > input[type="date"]').value;
         let isWeekly = $('form#datePicker > input[type="checkbox"]').checked;
-        console.log(date, isWeekly);
-        // window.location.href = `?date=${date}`;
+        date = date == '' ? date2iso(new Date()) : date; // default to today
+        window.location.href = isWeekly ? `?date=week-${date}`: `?date=${date}`;
     });
-    // month picker
-    // quarter picker
+    $('form#monthPicker > button[type="submit"]').addEventListener('click', (e) => {
+        e.preventDefault();
+        let year = $('form#monthPicker > select#m-year').value;
+        let month = $('form#monthPicker > select#m-month').value;
+        window.location.href = `?date=${year}-${month}`;
+    });
+    $('form#quarterPicker > button[type="submit"]').addEventListener('click', (e) => {
+        e.preventDefault();
+        let year = $('form#quarterPicker > select#q-year').value;
+        let quarter = $('form#quarterPicker > select#q-quarter').value;
+        console.log(year, quarter);
+        window.location.href = `?date=${year}-${quarter}`;
+    });
 };
 
 if ((new RegExp("complete|interactive|loaded")).test(document.readyState)) {
