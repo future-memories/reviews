@@ -599,8 +599,6 @@ let drawCharts = (reportType) => {
             // TODO: per-day timegraph - accumulate if quarterly
             break;
         case 'weekly':
-            // TODO: per-weekday timegraph - accumulate if monthly/quarterly
-            // weekday chart
             new Chart($('section#weekday > canvas'), getWeekdayChart());
         case 'daily':
             new Chart($('section#users-top > canvas'), getUsersChart(true, url.get('country') == null));
@@ -691,8 +689,8 @@ let onLoad = () => {
 
     // set the title
     switch (reportType) {
-        case 'daily': $('h2.title').innerText = `Daily report for ${reportDate}`; break;
-        case 'weekly': $('h2.title').innerText = `Weekly report for ${reportDate}`; break;
+        case 'daily': $('h2.title > span:first-child').innerText = `Daily report for ${reportDate}`; break;
+        case 'weekly': $('h2.title > span:first-child').innerText = `Weekly report for ${reportDate}`; break;
         case 'monthly':
             let [year, monthSlug] = urlDate.split('-');
             let month = {
@@ -700,18 +698,18 @@ let onLoad = () => {
                 'may': 'May', 'jun': 'June', 'jul': 'July', 'aug': 'August',
                 'sep': 'September', 'oct': 'October', 'nov': 'November', 'dec': 'December',
             }[monthSlug];
-            $('h2.title').innerText = `Monthly report for ${month} ${year}`;
+            $('h2.title > span:first-child').innerText = `Monthly report for ${month} ${year}`;
             break;
         case 'quarterly':
             let [qYear, quarter] = urlDate.split('-');
-            $('h2.title').innerText = `${quarter.toUpperCase()} report for ${qYear}`;
+            $('h2.title > span:first-child').innerText = `${quarter.toUpperCase()} report for ${qYear}`;
             break;
     }
     let [rangeStart, rangeEnd] = getInclusiveRange(reportDate, reportType);
     $('h2.title + p').innerText = `Includes all memories from ${rangeStart} to ${rangeEnd} UTC`;
     // modify title if country filter is applied
     if (url.get('country') != null) {
-        $('h2.title').innerText = `[${url.get('country')}] ` + $('h2.title').innerText;
+        $('h2.title select').value = url.get('country');
         $('h2.title + p').innerText += ` captured in ${url.get('country')}`;
     }
 
@@ -721,20 +719,30 @@ let onLoad = () => {
         let date = $('form#datePicker > input[type="date"]').value;
         let isWeekly = $('form#datePicker > input[type="checkbox"]').checked;
         date = date == '' ? date2iso(new Date()) : date; // default to today
-        window.location.href = isWeekly ? `?date=week-${date}`: `?date=${date}`;
+        date = isWeekly ? `week-${date}` : date;
+
+        let country = $('h2.title select').value;
+        let hasSelectedCountry = country != 'global' && country != null && country != '';
+        window.location.href = hasSelectedCountry ? `?date=${date}&country=${country}`: `?date=${date}`;
     });
     $('form#monthPicker > button[type="submit"]').addEventListener('click', (e) => {
         e.preventDefault();
         let year = $('form#monthPicker > select#m-year').value;
         let month = $('form#monthPicker > select#m-month').value;
-        window.location.href = `?date=${year}-${month}`;
+
+        let country = $('h2.title select').value;
+        let hasSelectedCountry = country != 'global' && country != null && country != '';
+        window.location.href = hasSelectedCountry ? `?date=${year}-${month}&country=${country}`: `?date=${year}-${month}`;
     });
     $('form#quarterPicker > button[type="submit"]').addEventListener('click', (e) => {
         e.preventDefault();
         let year = $('form#quarterPicker > select#q-year').value;
         let quarter = $('form#quarterPicker > select#q-quarter').value;
         console.log(year, quarter);
-        window.location.href = `?date=${year}-${quarter}`;
+
+        let country = $('h2.title select').value;
+        let hasSelectedCountry = country != 'global' && country != null && country != '';
+        window.location.href = hasSelectedCountry ? `?date=${year}-${quarter}&country=${country}` : `?date=${year}-${quarter}`;
     });
 
     $('footer').innerText = `Loaded in ${Date.now() - _time}ms`;
