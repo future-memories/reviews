@@ -88,41 +88,6 @@ let timeZoneDiff = {
 };
 let getTimeZoneDiff = (country) => timeZoneDiff[country] || 0;
 
-// report:
-// -> id: <daily/monthly/yearly>-<iso>
-//   -> daily-2024-11-05
-//   -> monthly-2024-11
-//   -> yearly-2024
-// -> type: daily/weekly/monthly/yearly
-//   -> weekly = last 7 days
-//   -> daily = from last daily report (23:59:59) to now
-// -> timestamp: (daily? 23:59:59) (monthly? all days from month) (yearly? all months from year)
-// -> countries: sorted list of
-//   -> country
-//   -> count
-//   -> percentage
-//   -> cities: sorted list of
-//     -> city
-//     -> count
-//     -> percentage
-// -> users: sorted list of
-//   -> user
-//   -> count
-// -> timegraph: list of
-//   -> index = hour of day
-//   -> value = count memories withing this hour (in the respective country TZ ~approx)
-// -> <for weekly & monthly reports only>:
-//   -> accumulated data of daily timegraphs
-// -> <for weekly reports only>:
-//   -> graph for day of week
-// -> <for monthly reports only>:
-//   -> graph for day of month
-//   -> accumulate graph for day of week
-
-// cell managers reports
-// per user:
-// X memories since last review per user
-
 let getReportType = (input) => {
     switch (input.length) {
         case 7:  return 'quarterly'; // YYYY-Q1
@@ -160,9 +125,62 @@ let setLoadingStatus = (status) => {
     $('p#loading-info').innerText = status;
 };
 
+// copied from review view index.mjs
+let getLastReviewTime = async (userId) => {
+    try {
+      // we only need the document IDs, but Firestore doesn't allow us to just fetch the IDs
+      // or maybe it does, but I don't know how to do it & ChatGPT hallucinates a `select()` method
+      // TODO: fix this if it eveer becomes too slow
+      let q = query(
+        collection(reviewDB, 'reviews'),
+        where('userId', '==', userId),
+        orderBy('timestamp', 'desc'),
+      );
+
+      // order document IDs by the last image timestamp (part of the id)
+      let querySnapshot = await getDocs(q);
+      let documentIds = querySnapshot.docs.map(doc => doc.id).sort((a, b) => {
+        let aSeconds = a.split('-').pop();
+        let bSeconds = b.split('-').pop();
+        console.log(aSeconds, bSeconds);
+        return Number(bSeconds) - Number(aSeconds);
+      });
+
+      if (documentIds.length > 0) {
+        return Number(documentIds[0].split('-').pop());
+      } else {
+        throw new Error(`[W]No memories found for user "${userId}"`);
+      }
+    } catch (error) {
+      let isWarning = error.message.startsWith("[W]");
+      let message = isWarning ? error.message.substring(3) : error.message;
+      (isWarning ? console.warn : console.error)(`X-Error[getLastReviewTime]: ${message}`);
+      return null;
+    }
+};
+
+// null = no reviews
+let getMemoriesSinceLastReview = async (userId) => {
+    let lastReviewTime = await getLastReviewTime(userId);
+    if (lastReviewTime == null) return null;
+    try {
+        let q = query(
+            collection(fmDB, "memory"),
+            where("userId", "==", userId),
+            where("timestamp", ">=", new Date(lastReviewTime * 1000)),
+            orderBy("timestamp", "desc")
+        );
+        return (await getDocs(q)).size;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 let getDailyReport = async (input) => {
+    let filterCountry = url.get('country');
+
     console.assert(input.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid date, expected ISO format");
-    let reportId = `daily-${input}`;
+    let reportId = filterCountry == null ? `daily-${input}` : `daily-${input}-${filterCountry}`;
     let dailyRef = doc(reviewDB, "analytics", reportId);
     try {
         let snapshot = await getDoc(dailyRef);
@@ -172,11 +190,15 @@ let getDailyReport = async (input) => {
     } catch (error) {
         console.log(error);
     }
-    setLoadingStatus(`Daily report for ${input} not found, generating...`);
+    setLoadingStatus(
+        filterCountry == null ? '' : `[${filterCountry}] ` +
+        `Daily report for ${input} not found, generating...`
+    );
 
     let report = {
         id: reportId,
         type: "daily",
+        filter: filterCountry,
         timestamp: iso2date(input).getTime(),
         countries: [],
         users: [],
@@ -185,10 +207,16 @@ let getDailyReport = async (input) => {
 
     let memories = [];
     try {
-        let q = query(
+        let q = filterCountry == null ? query(
             collection(fmDB, "memory"),
             where("timestamp", ">=", iso2date(input)),
             where("timestamp", "<", new Date(iso2date(input).getTime() + 24 * 60 * 60 * 1000)),
+            orderBy("timestamp", "desc")
+        ) : query(
+            collection(fmDB, "memory"),
+            where("timestamp", ">=", iso2date(input)),
+            where("timestamp", "<", new Date(iso2date(input).getTime() + 24 * 60 * 60 * 1000)),
+            where("country", "==", filterCountry),
             orderBy("timestamp", "desc")
         );
         (await getDocs(q)).forEach((doc) => {
@@ -246,7 +274,10 @@ let getDailyReport = async (input) => {
 
     try {
         await setDoc(dailyRef, report);
-        setLoadingStatus(`Daily report for ${input} generated and saved`);
+        setLoadingStatus(
+            filterCountry == null ? '' : `[${filterCountry}] ` +
+            `Daily report for ${input} generated and saved`
+        );
         return report;
     } catch (error) {
         console.error(error);
@@ -254,10 +285,12 @@ let getDailyReport = async (input) => {
 };
 
 let getWeeklyReport = async (input) => {
+    let filterCountry = url.get('country');
+
     console.assert(input.match(/^week-\d{4}-\d{2}-\d{2}$/), "Invalid weekly report format, expected week-<isoDate>");
     let date = input.substring('week-'.length);
 
-    let reportId = `weekly-${date}`;
+    let reportId = filterCountry == null ? `weekly-${date}` : `weekly-${date}-${filterCountry}`;
     let weeklyRef = doc(reviewDB, "analytics", reportId);
     try {
         let snapshot = await getDoc(weeklyRef);
@@ -267,18 +300,23 @@ let getWeeklyReport = async (input) => {
     } catch (error) {
         console.log(error);
     }
-    setLoadingStatus(`Weekly report for ${date} not found, generating...`);
+    setLoadingStatus(
+        filterCountry == null ? '' : `[${filterCountry}] ` +
+        `Weekly report for ${date} not found, generating...`
+    );
 
     let dailyReports = [];
     for (let i = 0; i < 7; i++) {
         let weekStart = iso2date(date);
         let weekIndex = date2iso(new Date(weekStart.getUTCFullYear(), weekStart.getUTCMonth(), weekStart.getUTCDate() + i));
+        // the filter is globally available as a URL parameter, so it won't be ignored
         dailyReports.push(await getDailyReport(weekIndex));
     }
 
     let report = {
         id: `weekly-${date}`,
         type: "weekly",
+        filter: filterCountry,
         timestamp: iso2date(input).getTime(),
         countries: [],
         users: [],
@@ -337,18 +375,23 @@ let getWeeklyReport = async (input) => {
     // if the date is Wednesday, i = 0 is Wednesday, so we need to save it in report.weekdayGraph[2] (because Wednesday = 2)
     let dayOfWeek = iso2date(date).getUTCDay();
     let weekdayReports = dailyReports.map(d => d.users.map(u => u.count).reduce((acc, c) => acc + c, 0));
-    console.log(weekdayReports)
     for (let i = 0; i < weekdayReports.length; i++) {
         report.weekdayGraph[(dayOfWeek + i) % 7].count = weekdayReports[i];
     }
 
     if (date2iso(new Date()) <= date) {
-        setLoadingStatus(`Weekly report for ${date} is incomplete.`);
+        setLoadingStatus(
+            filterCountry == null ? '' : `[${filterCountry}] ` +
+            `Weekly report for ${date} is incomplete.`
+        );
         alert(`NOTE: Weekly report for ${date} is incomplete.`);
     } else {
         try {
             await setDoc(weeklyRef, report);
-            setLoadingStatus(`Weekly report for ${date} generated and saved`);
+            setLoadingStatus(
+                filterCountry == null ? '' : `[${filterCountry}] ` +
+                `Weekly report for ${date} generated and saved`
+            );
         } catch (error) {
             console.error(error);
         }
@@ -382,6 +425,38 @@ let getCountryChart = (bestFirst = true, showOnlyTen = true) => {
             labels,
             datasets: [{
                 label: 'Memory Count by Country',
+                data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true },
+            }
+        }
+    };
+};
+
+let getCityChart = (country, bestFirst = true, showOnlyTen = true) => {
+    let data = window.currentReport.countries
+        .filter(c => c.country == country)
+        .flatMap(c => c.cities.map(city => city.count));
+    data = showOnlyTen ? data.slice(0, 10) : data;
+    data = bestFirst ? data : data.reverse();
+    let labels = window.currentReport.countries
+        .filter(c => c.country == country)
+        .flatMap(c => c.cities.map(city => city.city));
+    labels = showOnlyTen ? labels.slice(0, 10) : labels;
+    labels = bestFirst ? labels : labels.reverse();
+    return {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: `Memory Count by City in ${country}`,
                 data,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -509,11 +584,16 @@ let drawCharts = (reportType) => {
             // weekday chart
             new Chart($('section#weekday > canvas'), getWeekdayChart());
         case 'daily':
-            new Chart($('section#countries-top > canvas'), getCountryChart(true));
-            new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
             new Chart($('section#users-top > canvas'), getUsersChart(true));
             new Chart($('section#users-bottom > canvas'), getUsersChart(false));
             new Chart($('section#activity > canvas'), getActivityChart()); // accumulate if weekly/monthly/quarterly
+            if (url.get('country') != null) {
+                new Chart($('section#cities-top > canvas'), getCityChart(url.get('country'), true));
+                new Chart($('section#cities-bottom > canvas'), getCityChart(url.get('country'), false));
+            } else {
+                new Chart($('section#countries-top > canvas'), getCountryChart(true));
+                new Chart($('section#countries-bottom > canvas'), getCountryChart(false));
+            }
             break;
     }
 };
@@ -576,7 +656,17 @@ let onLoad = () => {
 
     // hide weekday reports
     switch(reportType) {
-        case 'daily': $('section#weekday').style.display = 'none'; break;
+        case 'daily':
+            $('section#weekday').remove();
+        default:
+            if (url.get('country') != null) {
+                $('section#countries-top').remove()
+                $('section#countries-bottom').remove()
+            } else {
+                $('section#cities-top').remove();
+                $('section#cities-bottom').remove();
+            }
+            break;
     }
 
     drawCharts(reportType);
