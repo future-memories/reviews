@@ -356,6 +356,17 @@ let accumDayOfWeek = (dailyReports, startDate) => {
     return report;
 };
 
+// uses the weekdayGraph instead of dates
+let accumDayOfWeek2 = (reports) => {
+    let report = [1, 2, 3, 4, 5, 6, 7].map(i => ({ i, count: 0 }));
+    for (let r of reports) {
+        for (let i = 0; i < 7; i++) {
+            report[i].count += r.weekdayGraph[i].count;
+        }
+    }
+    return report;
+};
+
 let getWeeklyReport = async (input) => {
     let filterCountry = url.get('country');
 
@@ -482,22 +493,90 @@ let getMonthlyReport = async (input) => {
         );
         alert(`NOTE: Monthly report for ${monthSlug} ${year} is incomplete.`);
     } else {
-        // try {
-        //     await setDoc(monthlyRef, report);
-        //     setLoadingStatus(
-        //         (filterCountry == null ? '' : `[${filterCountry}] `) +
-        //         `Monthly report for ${monthSlug} ${year} generated and saved`
-        //     );
-        // } catch (error) {
-        //     console.error(error);
-        // }
+        try {
+            await setDoc(monthlyRef, report);
+            setLoadingStatus(
+                (filterCountry == null ? '' : `[${filterCountry}] `) +
+                `Monthly report for ${monthSlug} ${year} generated and saved`
+            );
+        } catch (error) {
+            console.error(error);
+        }
     }
     return report;
 }
 
 let getQuarterlyReport = async (input) => {
-    alert("Quarterly reports are not supported yet");
-    // throw new Error("Quarterly reports are not supported yet");
+    let filterCountry = url.get('country');
+
+    console.assert(input.match(/^\d{4}-Q[1234]$/), "Invalid quarterly report format, expected <year>-Q[1234]");
+    let [year, quarter] = input.split('-');
+    quarter = quarter.toUpperCase();
+    let quarterId = Number(quarter[1]) - 1;
+
+    let reportId = filterCountry == null ? `quarterly-${year}-${quarter}` : `quarterly-${year}-${quarter}-${filterCountry}`;
+    let quarterlyRef = doc(reviewDB, "analytics", reportId);
+    try {
+        let snapshot = await getDoc(quarterlyRef);
+        if (snapshot.exists()) {
+            return snapshot.data();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+    setLoadingStatus(
+        (filterCountry == null ? '' : `[${filterCountry}] `) +
+        `Quarterly report for ${quarter} ${year} not found, generating...`
+    );
+
+    let monthSlugs = [
+        ['JAN', 'FEB', 'MAR'],
+        ['APR', 'MAY', 'JUN'],
+        ['JUL', 'AUG', 'SEP'],
+        ['OCT', 'NOV', 'DEC']
+    ][quarterId];
+    let monthlyReports = [
+        await getMonthlyReport(`${year}-${monthSlugs[0]}`),
+        await getMonthlyReport(`${year}-${monthSlugs[1]}`),
+        await getMonthlyReport(`${year}-${monthSlugs[2]}`),
+    ];
+
+    let report = {
+        id: reportId,
+        type: "quarterly",
+        filter: filterCountry,
+        timestamp: iso2date(input).getTime(),
+        countries: [],
+        users: [],
+        timegraph: [],
+        weekdayGraph: [],
+        total: monthlyReports.reduce((acc, d) => acc + d.total, 0),
+    };
+
+    report.countries = accumCountryReports(monthlyReports);
+    report.users = accumUserReports(monthlyReports);
+    report.timegraph = accumTimegraph(monthlyReports);
+    report.weekdayGraph = accumDayOfWeek2(monthlyReports);
+
+    let monthStart = new Date(year, quarterId * 3, 1);
+    if (date2iso(new Date()) <= monthStart) {
+        setLoadingStatus(
+            (filterCountry == null ? '' : `[${filterCountry}] `) +
+            `Quarterly report for ${quarter} ${year} is incomplete.`
+        );
+        alert(`NOTE: Quarterly report for ${quarter} ${year} is incomplete.`);
+    } else {
+        try {
+            await setDoc(quarterlyRef, report);
+            setLoadingStatus(
+                (filterCountry == null ? '' : `[${filterCountry}] `) +
+                `Quarterly report for ${quarter} ${year} generated and saved`
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    return report;
 }
 
 // --- charts
@@ -685,7 +764,6 @@ let drawCharts = (reportType) => {
     switch (reportType) {
         case 'quarterly':
             // TODO: per-month timegraph ?
-            break;
         case 'monthly':
             // TODO: per-day timegraph - accumulate if quarterly
         case 'weekly':
