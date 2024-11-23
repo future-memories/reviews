@@ -3,7 +3,7 @@ body { margin: 0.5rem; }
 main {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto repeat(5, 1fr); /* weekday is sometimes not present, define only 5 rows, TODO: make it auto-fill? */
+    grid-template-rows: auto auto repeat(2, 1fr); /* weekday is sometimes not present, define only 5 rows, TODO: make it auto-fill? */
     gap: 0.5rem;
 }
 header { grid-row: 1; }
@@ -32,7 +32,7 @@ form#datePicker > input[type="checkbox"] { margin-top: 0.75rem; }
     main {
         margin-inline: 1rem;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto 1fr 1fr 1fr;
+        grid-template-rows: auto auto 1fr 1fr;
     }
     header { grid-column: 1 / span 2; }
     nav { grid-column: 1 / span 2; }
