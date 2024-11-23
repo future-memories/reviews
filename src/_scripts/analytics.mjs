@@ -604,7 +604,15 @@ let getCountryChart = (bestFirst = true, showOnlyTen = true) => {
             indexAxis: 'y',
             scales: {
                 x: { beginAtZero: true },
-            }
+            },
+            // make the bars clickable to filter by country
+            onClick: (_event, elements) => {
+                if (elements.length > 0) {
+                    let country = labels[elements[0].index];
+                    let date = url.get('date') || date2iso(new Date());
+                    window.location.href = `?date=${date}&country=${country}`;
+                }
+            },
         }
     };
 };
