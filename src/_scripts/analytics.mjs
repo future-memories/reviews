@@ -890,6 +890,27 @@ let onLoad = () => {
     }
     $('h2.title + p').innerText += ` (${window.currentReport.total} total memories)`;
 
+    // set `selected` values in input
+    switch (reportType) {
+        case 'daily':
+            $('form#datePicker > input[type="date"]').value = reportDate;
+            break;
+        case 'weekly':
+            $('form#datePicker > input[type="date"]').value = reportDate;
+            $('form#datePicker > input[type="checkbox"]').checked = true;
+            break;
+        case 'monthly':
+            let [year, monthSlug] = urlDate.split('-');
+            $('form#monthPicker > select#m-year').value = year;
+            $('form#monthPicker > select#m-month').value = monthSlug;
+            break;
+        case 'quarterly':
+            let [qYear, quarter] = urlDate.split('-');
+            $('form#quarterPicker > select#q-year').value = qYear;
+            $('form#quarterPicker > select#q-quarter').value = quarter;
+            break;
+    }
+
     // TODO: check the value of the country filter
     $('form#datePicker > button[type="submit"]').addEventListener('click', (e) => {
         e.preventDefault();
