@@ -68,8 +68,8 @@ section > h3 { margin-top: 0; }
 
 /* overrides for img#current-memory */
 img.good { border-color: green !important; }
-img.bad { border-color: #eee !important; }
+img.bad { border-color: #ddd !important; }
 img.extra-bad { border-color: red !important; }
 img.task { border-color: blue !important; }
 img.fail { border-color: orange !important; }
-img.pending { border-color: silver !important; }
+img.pending { border-color: #666 !important; }
