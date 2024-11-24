@@ -69,7 +69,8 @@ let getLastReviewTime = async (userId) => {
     let lastReview = (await getDoc(doc(reviewDB, "reviews", lastReviewId))).data();
 
     if (lastReview.hasOwnProperty("imageIds")) {
-      let lastReviewedImageId = lastReview.imageIds[lastReview.imageIds.length - 1];
+      // images are ordered by timestamp descending, so the first one in the list is the latest
+      let lastReviewedImageId = lastReview.imageIds[0];
       let lastMemory = await getMemory(lastReviewedImageId);
       return lastMemory.timestamp;
     }
