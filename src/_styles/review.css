@@ -42,7 +42,7 @@ section > h3 { margin-top: 0; }
     width: calc(100% - var(--border) * 2);
     aspect-ratio: 2 / 3;
     object-fit: cover;
-    border: var(--border) solid silver;
+    border: var(--border) solid #ddd; /* same as .pending */;
 }
 #memory-nav {
     margin-top: calc(var(--border) * 2);
@@ -52,7 +52,7 @@ section > h3 { margin-top: 0; }
 }
 #memory-id {
     text-align: center;
-    color: silver;
+    color: #ddd; /* same as .pending */
     font-size: 0.9rem;
     margin-block: auto;
 }
@@ -68,8 +68,8 @@ section > h3 { margin-top: 0; }
 
 /* overrides for img#current-memory */
 img.good { border-color: green !important; }
-img.bad { border-color: #ddd !important; }
+img.bad { border-color: #666 !important; }
 img.extra-bad { border-color: red !important; }
 img.task { border-color: blue !important; }
 img.fail { border-color: orange !important; }
-img.pending { border-color: #666 !important; }
+img.pending { border-color: #ddd !important; }
