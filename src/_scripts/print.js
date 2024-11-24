@@ -94,10 +94,11 @@ window.review = await getReview(reviewId);
 
 let statusReverseMap = {
   0: 'pending', // should never exist
-  1: 'good',
-  2: 'bad',
-  3: 'task',
-  4: 'fail',
+  1: 'good', // paying (rate based on country)
+  2: 'bad', // not paying for, not marked
+  3: 'task', // paying extra for task
+  4: 'fail', // not paying for, bad image for task
+  5: 'extra-bad', // not paying for, marked red
 };
 for (let i = 0; i < window.memoryCards.length; i++) {
   window.memoryCards[i].className = statusReverseMap[window.review.data[i]];

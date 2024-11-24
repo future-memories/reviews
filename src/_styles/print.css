@@ -42,7 +42,8 @@ img {
 }
 
 img.good { border-color: green; }
-img.bad { border-color: red; }
+img.bad { border-color: #333; }
+img.extra-bad { border-color: red; }
 img.task { border-color: blue; }
 img.fail { border-color: orange; }
 img.pending { border-color: silver; }

@@ -14,6 +14,7 @@ document.addEventListener('x-memories-ready', () => {
   $('#btn-skip').addEventListener('click', controlSkip);
   $('#btn-good').addEventListener('click', controlGood);
   $('#btn-bad').addEventListener('click', controlBad);
+  $('#btn-extra-bad').addEventListener('click', controlExtraBad);
   $('#btn-task').addEventListener('click', controlTask);
   $('#btn-fail').addEventListener('click', controlFail);
   document.addEventListener('keyup', controlListener);
@@ -57,6 +58,7 @@ let controlListener = (event) => {
     case 's': controlBad(); break;
     case 'd': controlTask(); break;
     case 'f': controlFail(); break;
+    case 'x': controlExtraBad(); break;
     default: break;
   }
 }
@@ -65,6 +67,7 @@ let controlSkip = () => { window.reviewState.moveIndexBy(1); update(); }
 let controlPrev = () => { window.reviewState.moveIndexBy(-1); update(); }
 let controlGood = () => { window.reviewState.setStatus("good"); window.reviewState.moveIndexBy(1); update(); }
 let controlBad = () => { window.reviewState.setStatus("bad"); window.reviewState.moveIndexBy(1); update(); }
+let controlExtraBad = () => { window.reviewState.setStatus("extra-bad"); window.reviewState.moveIndexBy(1); update(); }
 let controlTask = () => { window.reviewState.setStatus("task"); window.reviewState.moveIndexBy(1); update(); }
 let controlFail = () => { window.reviewState.setStatus("fail"); window.reviewState.moveIndexBy(1); update(); }
 

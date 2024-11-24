@@ -173,6 +173,7 @@ let onSubmit = async (e) => {
     'bad': 2,
     'task': 3,
     'fail': 4,
+    'extra-bad': 5,
   };
   let data = window.reviewState.data.map(d => statusMap[d.status]);
   let userId = url.get('userId');
@@ -187,7 +188,7 @@ let onSubmit = async (e) => {
     reviewSummary: {
       "total": window.reviewState.total,
       "eligible": data.filter(d => d == statusMap["good"]).length,
-      "not-eligible": data.filter(d => d == statusMap["bad"]).length,
+      "not-eligible": data.filter(d => d == statusMap["bad"] || d == statusMap["extra-bad"]).length,
       "task": data.filter(d => d == statusMap["task"]).length,
       "not-eligible-for-task": data.filter(d => d == statusMap["fail"]).length,
     },
