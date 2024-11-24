@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, collection, query, where, orderBy, limit, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 let $ = (selector) => document.querySelector(selector);
 
@@ -60,12 +60,24 @@ let getLastReviewTime = async (userId) => {
       console.log(aSeconds, bSeconds);
       return Number(bSeconds) - Number(aSeconds);
     });
-
-    if (documentIds.length > 0) {
-      return Number(documentIds[0].split('-').pop());
-    } else {
+    if (documentIds.length == 0) {
+      // shitty error handling system, should revise
       throw new Error(`[W]No memories found for user "${userId}"`);
     }
+
+    let lastReviewId = documentIds[0];
+    let lastReview = (await getDoc(doc(reviewDB, "reviews", lastReviewId))).data();
+
+    if (lastReview.hasOwnProperty("imageIds")) {
+      let lastReviewedImageId = lastReview.imageIds[lastReview.imageIds.length - 1];
+      let lastMemory = await getMemory(lastReviewedImageId);
+      return lastMemory.timestamp;
+    }
+    // if the review doesn't have an imageIds field, it's a legacy review
+    // we can just return 1 seconds past the last review, based on the reviewId
+    // small chance we skip some image(s) if submitted offline
+    let lastSecond = Number(lastReviewId.split('-').pop()) + 1;
+    return {seconds: lastSecond, nanoseconds: 0};
   } catch (error) {
     let isWarning = error.message.startsWith("[W]");
     let message = isWarning ? error.message.substring(3) : error.message;
@@ -99,13 +111,13 @@ let getMemory = async (memoryId) => {
 let onSubmit = async (e) => {
   e.preventDefault(); // prevent default form behavior
   let quit = (msg) => { alert(msg); return false };
-  let redirect = (userId, timestamp, exclusive = false) => window.location.href = `review.html?userId=${userId}&since=${timestamp.seconds}` + (exclusive ? "&exclusive=true" : "");
+  let redirect = (userId, timestamp, exclusive = false) => window.location.href = `review.html?userId=${userId}&since=${timestamp.seconds}&ns=${timestamp.nanoseconds}` + (exclusive ? "&exclusive=true" : "");
 
   let userId = parseUserId($("#user").value);
   if (userId == null) return quit("Invalid user ID");
 
   let lastReviewEnd = await getLastReviewTime(userId);
-  if (lastReviewEnd != null) return redirect(userId, {seconds: lastReviewEnd}, true);
+  if (lastReviewEnd != null) return redirect(userId, lastReviewEnd, true);
 
   let inputLastMemory = $("#last-memory").value;
   if (inputLastMemory == "") {
@@ -113,7 +125,7 @@ let onSubmit = async (e) => {
     return quit("No reviews found for this user. Please input last non-reviewed memory (as URL or ID) and resubmit.");
   }
 
-  if (inputLastMemory == "ALL") return redirect(userId, {seconds: 0});
+  if (inputLastMemory == "ALL") return redirect(userId, {seconds: 0, nanoseconds: 0});
 
   let memoryId = parseMemoryId(inputLastMemory);
   if (memoryId == null) return quit("Invalid memory ID");

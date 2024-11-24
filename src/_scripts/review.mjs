@@ -33,6 +33,7 @@ let getMemories = async () => {
   }
 
   let lastMemoryTimestamp = url.get('since'); // in seconds
+  let lastMemoryNanoseconds = url.get('nanoseconds') ?? 0;
   if (lastMemoryTimestamp == null) {
     alert('Required URL parameter `since` is missing');
     throw new Error('Required URL parameter `since` is missing');
@@ -48,13 +49,12 @@ let getMemories = async () => {
     let q = reviewEnd == null ? query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
-      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000)),
+      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000 + lastMemoryNanoseconds)),
       orderBy('timestamp', 'desc'),
-      // limit(100),
     ) : query(
       collection(fmDB, 'memory'),
       where('userId', '==', userId),
-      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000)),
+      where('timestamp', comparison, new Date(Number(lastMemoryTimestamp) * 1000 + lastMemoryNanoseconds)),
       where('timestamp', '<', new Date((Number(reviewEnd) + 1) * 1000)),
       orderBy('timestamp', 'desc'),
     );
