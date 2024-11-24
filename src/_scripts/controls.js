@@ -38,6 +38,7 @@ document.addEventListener('x-memories-ready', () => {
       2: 'bad',
       3: 'task',
       4: 'fail',
+      5: 'extra-bad',
     };
     console.assert(window.editReview.data.length == window.memoryData.length);
     window.editReview.data.forEach(statusId => {
