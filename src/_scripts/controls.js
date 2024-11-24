@@ -45,6 +45,7 @@ document.addEventListener('x-memories-ready', () => {
       window.reviewState.setStatus(statusReverseMap[statusId]);
       window.reviewState.moveIndexBy(1);
     });
+    $("#comment").value = window.editReview.comment;
     update();
   }
 });
