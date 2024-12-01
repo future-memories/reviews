@@ -1,4 +1,5 @@
 let $ = (selector) => document.querySelector(selector);
+let fm = (userId) => 'FM' + userId.substring(userId.length - 6).toUpperCase();
 
 document.addEventListener('x-memories-ready', () => {
   console.log('[EVENT] x-memories-ready');
@@ -17,6 +18,7 @@ document.addEventListener('x-memories-ready', () => {
   $('#btn-extra-bad').addEventListener('click', controlExtraBad);
   $('#btn-task').addEventListener('click', controlTask);
   $('#btn-fail').addEventListener('click', controlFail);
+  $('#btn-highlight').addEventListener('click', postToDiscord);
   document.addEventListener('keyup', controlListener);
 
   $('#review > table .user').innerText = window.reviewState.getMemory().userId;
@@ -72,6 +74,35 @@ let controlBad = () => { window.reviewState.setStatus("bad"); window.reviewState
 let controlExtraBad = () => { window.reviewState.setStatus("extra-bad"); window.reviewState.moveIndexBy(1); update(); }
 let controlTask = () => { window.reviewState.setStatus("task"); window.reviewState.moveIndexBy(1); update(); }
 let controlFail = () => { window.reviewState.setStatus("fail"); window.reviewState.moveIndexBy(1); update(); }
+let postToDiscord = () => {
+  // make a post request to the discord API to publish a message
+  let data = window.reviewState.getMemory();
+  fetch(`https://fm.mitiko.xyz/discord`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      content: `Highlighted memory from ${fm(data.userId)} in ${data.country}`,
+      embeds: [{
+        "title": `Memory #${data.imageId}`,
+        "description": `Location: ${data.city}, ${data.country}`,
+        "image": { "url": `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}` },
+        "fields": [
+          { "name": "User", "value": data.userId, "inline": true },
+          { "name": "Date", "value": new Date(data.timestamp.seconds * 1000).toISOString().split('.')[0].replace('T', ' '), "inline": true },
+          { "name": "Tags", "value": data.tags.map(tag => tag.keyword.toLowerCase()).join(', ') },
+        ],
+      }],
+    }),
+  }).then(response => {
+    if (response.ok) {
+      alert('[INFO] Successfully posted to Discord');
+    } else {
+      alert('[ERROR] Failed to post to Discord');
+    }
+  });
+};
 
 let update = () => {
   $('#review > table .progress').innerText = `${window.reviewState.reviewed} / ${window.reviewState.total} reviewed (${window.reviewState.getPercentageReviewed()}%)`;
