@@ -178,6 +178,10 @@ let getMemoriesSinceLastReview = async (userId) => {
 
 let getDailyReport = async (input) => {
     let filterCountry = url.get('country');
+    // make first letter uppercase
+    if (filterCountry != null) {
+        filterCountry = filterCountry.charAt(0).toUpperCase() + filterCountry.slice(1);
+    }
 
     console.assert(input.match(/^\d{4}-\d{2}-\d{2}$/), "Invalid date, expected ISO format");
     let reportId = filterCountry == null ? `daily-${input}` : `daily-${input}-${filterCountry}`;
@@ -369,6 +373,10 @@ let accumDayOfWeek2 = (reports) => {
 
 let getWeeklyReport = async (input) => {
     let filterCountry = url.get('country');
+    // make first letter uppercase
+    if (filterCountry != null) {
+        filterCountry = filterCountry.charAt(0).toUpperCase() + filterCountry.slice(1);
+    }
 
     console.assert(input.match(/^week-\d{4}-\d{2}-\d{2}$/), "Invalid weekly report format, expected week-<isoDate>");
     let date = input.substring('week-'.length);
@@ -436,6 +444,10 @@ let getWeeklyReport = async (input) => {
 
 let getMonthlyReport = async (input) => {
     let filterCountry = url.get('country');
+    // make first letter uppercase
+    if (filterCountry != null) {
+        filterCountry = filterCountry.charAt(0).toUpperCase() + filterCountry.slice(1);
+    }
 
     console.assert(input.match(/^\d{4}-[A-Za-z]{3}$/), "Invalid monthly report format, expected <year>-<monthSlug>");
     let [year, monthSlug] = input.split('-');
@@ -508,6 +520,10 @@ let getMonthlyReport = async (input) => {
 
 let getQuarterlyReport = async (input) => {
     let filterCountry = url.get('country');
+    // make first letter uppercase
+    if (filterCountry != null) {
+        filterCountry = filterCountry.charAt(0).toUpperCase() + filterCountry.slice(1);
+    }
 
     console.assert(input.match(/^\d{4}-Q[1234]$/), "Invalid quarterly report format, expected <year>-Q[1234]");
     let [year, quarter] = input.split('-');
