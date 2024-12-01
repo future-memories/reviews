@@ -901,6 +901,14 @@ let onLoad = () => {
     $('h2.title + p').innerText = `Includes all memories from ${rangeStart} to ${rangeEnd} UTC`;
     // modify title if country filter is applied
     if (url.get('country') != null) {
+        let countryExistsInFilter = [...$('h2.title select').querySelectorAll('option')].some(c => c.value == url.get('country'));
+        if (!countryExistsInFilter) {
+            let option = document.createElement('option');
+            option.value = url.get('country');
+            option.innerText = url.get('country');
+            $('h2.title select').appendChild(option);
+        }
+
         $('h2.title select').value = url.get('country');
         $('h2.title + p').innerText += ` captured in ${url.get('country')}`;
     }
