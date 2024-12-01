@@ -47,13 +47,14 @@ section > h3 { margin-top: 0; }
 #memory-nav {
     margin-top: calc(var(--border) * 2);
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: auto auto auto;
     gap: 2ch;
 }
 #memory-id {
     text-align: center;
     color: #ddd; /* same as .pending */
     font-size: 0.9rem;
+    margin-block: auto;
 }
 
 #status table td { min-width: 20ch; }

@@ -12,3 +12,15 @@ docs: https://firebase.google.com/docs/firestore/manage-data/add-data
 - [ ] terraform for firebase
 - [ ] check if user is authorized
 - [ ] single module file for common operations, functions &
+
+### TODO - analytics
+
+- [ ] cell manager page -> one per country, memory count since last review (highlight if more than 200)
+- [ ] monthly report -> url `type` param, same `date` param (extract the date, split by dash)
+- [ ] onSnapshot() live updates for daily report ???
+- [ ] move to new firebase project (but maybe we want the terraform here now)
+- [ ] UI/UX
+  - [ ] usernames should be links (clickable)
+  - [ ] higlight users with reviews on & date of latest review, images since last review
+  - [ ] countries should be clickable -> go to cell manager's page
+  - [ ] periods for 1 week, 1 month, 3 months
