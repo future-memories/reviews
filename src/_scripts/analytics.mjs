@@ -679,7 +679,7 @@ let getUsersChart = (bestFirst = true, showOnlyTen = true) => {
             onClick: (_event, elements) => {
                 if (elements.length > 0) {
                     let userId = userIds[elements[0].index];
-                    window.location.href = `https://explorer.futurememory.app/user/${userId}`;
+                    window.open(`https://explorer.futurememory.app/user/${userId}`, '_blank').focus();
                 }
             },
             plugins: {
