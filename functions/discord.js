@@ -18,3 +18,15 @@ export async function onRequestPost(context) {
         },
     });
 }
+
+export function onRequestOptions(context) {
+    return new Response(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*', // Allow all origins
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Max-Age': '86400', // Cache the preflight response for 1 day
+        },
+    });
+}
