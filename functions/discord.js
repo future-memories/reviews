@@ -4,7 +4,7 @@ export async function onRequestPost(context) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bot ${context.secrets.DISCORD_BOT_TOKEN}`,
+            'Authorization': `Bot ${context.env.DISCORD_BOT_TOKEN}`,
         },
         body: JSON.stringify(body),
     });
