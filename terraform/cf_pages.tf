@@ -11,9 +11,22 @@ resource "cloudflare_pages_project" "main" {
     type = "github"
 
     config {
-      owner             = "mitiko"
-      repo_name         = "future-memory-reviews"
+      owner             = "future-memories"
+      repo_name         = "reviews"
       production_branch = "main"
+    }
+  }
+
+  deployment_configs {
+    production {
+      secrets = {
+        "DISCORD_BOT_TOKEN" = var.discord_bot_token
+      }
+    }
+    preview {
+      secrets = {
+        "DISCORD_BOT_TOKEN" = var.discord_bot_token
+      }
     }
   }
 }
