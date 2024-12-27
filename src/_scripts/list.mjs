@@ -60,7 +60,7 @@ let parseReviewId = (reviewId) => {
 
 let getReviewIds = async () => {
     try {
-        let q = query(collection(reviewDB, "reviews"), limit(500));
+        let q = query(collection(reviewDB, "reviews"));
         return (await getDocs(q)).docs.map(doc => doc.id);
     } catch (error) {
         console.error("X-Error:", error);
