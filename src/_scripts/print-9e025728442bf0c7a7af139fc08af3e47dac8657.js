@@ -39,35 +39,32 @@ let getReview = async (reviewId) => {
   }
 };
 
-let getMemories = async (userId, startSeconds, endSeconds) => {
-  let memoryData = [];
+let getMemories = async (review) => {
   try {
-    let q = query(
-      collection(fmDB, 'memory'),
-      and(
-        where('userId', '==', userId),
-        where('timestamp', '>=', new Date(Number(startSeconds) * 1000)),
-        where('timestamp', '<', new Date((Number(endSeconds) + 1) * 1000)),
-      ),
-      orderBy('timestamp', 'desc')
-    );
-    (await getDocs(q)).forEach((doc) => {
-      let data = doc.data(); // client-side filtering, due to no index for type
-      if (data.type == 'Uploaded') {
-        memoryData.push(data);
+    const memoryPromises = review.imageIds.map(async (imageId) => {
+      let docSnap = await getDoc(doc(fmDB, 'images', imageId));
+      if (docSnap.exists()) {
+        return docSnap.data();
+      } else {
+        alert(`Memory not found: ${imageId}`);
+        throw new Error(`Memory not found ${imageId}`);
       }
     });
+
+    let memoryData = await Promise.all(memoryPromises);
+    console.log("Fetched all 'images' objects in review");
+    console.log('mem[0]', memoryData[0]);
+    return memoryData;
   } catch (error) {
     console.error("X-Error:", error);
+    alert(error);
     throw error;
   }
-  console.log('mem[0]', memoryData[0]);
-  return memoryData;
 };
 
 let createMemoryCard = (data) => {
   let img = document.createElement('img');
-  img.src = `https://xiw.io/cdn-cgi/image/width=85,quality=80/${data.imageUrl}`;
+  img.src = `https://xiw.io/cdn-cgi/image/width=85,quality=80/${data.url}`;
   return img;
 };
 
@@ -84,13 +81,13 @@ if (reviewMatch == null) {
   throw new Error('Invalid reviewId format');
 }
 
-let userId = reviewMatch.groups.userId;
-let startSeconds = reviewMatch.groups.startSeconds;
-let endSeconds = reviewMatch.groups.endSeconds;
+// let userId = reviewMatch.groups.userId;
+// let startSeconds = reviewMatch.groups.startSeconds;
+// let endSeconds = reviewMatch.groups.endSeconds;
 
-window.memoryData = await getMemories(userId, startSeconds, endSeconds);
-window.memoryCards = window.memoryData.map(data => createMemoryCard(data));
 window.review = await getReview(reviewId);
+window.memoryData = await getMemories(window.review);
+window.memoryCards = window.memoryData.map(data => createMemoryCard(data));
 
 let statusReverseMap = {
   0: 'pending', // should never exist
@@ -100,6 +97,7 @@ let statusReverseMap = {
   4: 'fail', // not paying for, bad image for task
   5: 'extra-bad', // not paying for, marked red
 };
+
 for (let i = 0; i < window.memoryCards.length; i++) {
   window.memoryCards[i].className = statusReverseMap[window.review.data[i]];
 }
