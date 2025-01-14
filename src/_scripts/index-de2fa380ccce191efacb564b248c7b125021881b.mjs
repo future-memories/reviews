@@ -57,20 +57,23 @@ let getLastReviewTime = async (userId) => {
     let documentIds = querySnapshot.docs.map(doc => doc.id).sort((a, b) => {
       let aSeconds = a.split('-').pop();
       let bSeconds = b.split('-').pop();
-      console.log(aSeconds, bSeconds);
       return Number(bSeconds) - Number(aSeconds);
     });
     if (documentIds.length == 0) {
       // shitty error handling system, should revise
-      throw new Error(`[W]No memories found for user "${userId}"`);
+      throw new Error(`[W]No reviews found for user "${userId}"`);
+    } else {
+      console.log(`Found ${documentIds.length} reviews for user "${userId}"`);
     }
 
     let lastReviewId = documentIds[0];
     let lastReview = (await getDoc(doc(reviewDB, "reviews", lastReviewId))).data();
 
     if (lastReview.hasOwnProperty("imageIds")) {
+      console.log(`Last review ${lastReviewId} is v2 and has property imageIds, fetching last memory...`);
       // images are ordered by timestamp descending, so the first one in the list is the latest
       let lastReviewedImageId = lastReview.imageIds[0];
+      console.log(`Last memory ID: ${lastReviewedImageId}`);
       let lastMemory = await getMemory(lastReviewedImageId);
       return lastMemory.timestamp;
     }
@@ -78,6 +81,7 @@ let getLastReviewTime = async (userId) => {
     // we can just return 1 seconds past the last review, based on the reviewId
     // small chance we skip some image(s) if submitted offline
     let lastSecond = Number(lastReviewId.split('-').pop()) + 1;
+    console.log(`Last review ${lastReviewId} is v1 and does not have property imageIds. Starting review from ${lastSecond}`);
     return {seconds: lastSecond, nanoseconds: 0};
   } catch (error) {
     let isWarning = error.message.startsWith("[W]");
@@ -92,6 +96,7 @@ let getMemory = async (memoryId) => {
     let ref = doc(fmDB, "images", memoryId);
     let snapshot = await getDoc(ref);
     if (snapshot.exists()) {
+        console.log("Memory found", snapshot.data());
         return snapshot.data();
     } else {
       console.error(`Memory not found. memoryId = "${memoryId}"`);
