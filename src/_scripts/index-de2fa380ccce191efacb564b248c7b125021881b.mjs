@@ -89,22 +89,16 @@ let getLastReviewTime = async (userId) => {
 
 let getMemory = async (memoryId) => {
   try {
-    let q = query(collection(fmDB, 'memory'), where('imageId', '==', memoryId), limit(1));
-
-    let results = [];
-    (await getDocs(q)).forEach((doc) => {
-      results.push(doc.data());
-    });
-
-    if (results.length === 1) {
-      return results[0];
+    let ref = doc(fmDB, "images", memoryId);
+    let snapshot = await getDoc(ref);
+    if (snapshot.exists()) {
+        return snapshot.data();
     } else {
-      throw new Error(`[W]Memory not found. memoryId = "${memoryId}"`);
+      console.error(`Memory not found. memoryId = "${memoryId}"`);
+      return null;
     }
   } catch (error) {
-    let isWarning = error.message.startsWith("[W]");
-    let message = isWarning ? error.message.substring(3) : error.message;
-    (isWarning ? console.warn : console.error)(`X-Error[getMemory]: ${message}`);
+    console.error(`X-Error[getMemory]: ${error}`);
     return null;
   }
 };
