@@ -75,7 +75,7 @@ let getLastReviewTime = async (userId) => {
       let lastReviewedImageId = lastReview.imageIds[0];
       console.log(`Last memory ID: ${lastReviewedImageId}`);
       let lastMemory = await getMemory(lastReviewedImageId);
-      return lastMemory.timestamp;
+      return lastMemory.uploaded_at;
     }
     // if the review doesn't have an imageIds field, it's a legacy review
     // we can just return 1 seconds past the last review, based on the reviewId
