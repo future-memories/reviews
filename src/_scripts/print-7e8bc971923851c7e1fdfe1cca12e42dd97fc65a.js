@@ -81,9 +81,9 @@ if (reviewMatch == null) {
   throw new Error('Invalid reviewId format');
 }
 
-// let userId = reviewMatch.groups.userId;
-// let startSeconds = reviewMatch.groups.startSeconds;
-// let endSeconds = reviewMatch.groups.endSeconds;
+let userId = reviewMatch.groups.userId;
+let startSeconds = reviewMatch.groups.startSeconds;
+let endSeconds = reviewMatch.groups.endSeconds;
 
 window.review = await getReview(reviewId);
 window.memoryData = await getMemories(window.review);
