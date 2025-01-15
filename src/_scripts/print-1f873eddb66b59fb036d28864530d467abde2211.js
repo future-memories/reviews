@@ -39,19 +39,34 @@ let getReview = async (reviewId) => {
   }
 };
 
+const BATCH_SIZE = 500;
 let getMemories = async (review) => {
   try {
-    const memoryPromises = review.imageIds.map(async (imageId) => {
-      let docSnap = await getDoc(doc(fmDB, 'images', imageId));
-      if (docSnap.exists()) {
-        return docSnap.data();
-      } else {
-        alert(`Memory not found: ${imageId}`);
-        throw new Error(`Memory not found ${imageId}`);
-      }
-    });
+    // Helper function to process a batch of imageIds
+    const fetchBatch = async (batch) => {
+      const memoryPromises = batch.map(async (imageId) => {
+        let docSnap = await getDoc(doc(fmDB, "images", imageId));
+        if (docSnap.exists()) {
+          return docSnap.data();
+        } else {
+          console.warn(`Memory not found: ${imageId}`);
+          throw new Error(`Memory not found: ${imageId}`);
+        }
+      });
+      return Promise.all(memoryPromises);
+    };
 
-    let memoryData = await Promise.all(memoryPromises);
+    const { imageIds } = review;
+    const memoryData = [];
+
+    // Process in chunks of BATCH_SIZE
+    for (let i = 0; i < imageIds.length; i += BATCH_SIZE) {
+      const batch = imageIds.slice(i, i + BATCH_SIZE);
+      const batchData = await fetchBatch(batch);
+      console.log(`Fetched ${batchData.length} (total = ${i + batchData.length}) image URLs from DB`);
+      memoryData.push(...batchData); // Append results to the final array
+    }
+
     console.log("Fetched all 'images' objects in review");
     console.log('mem[0]', memoryData[0]);
     return memoryData;
