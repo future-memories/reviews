@@ -132,10 +132,13 @@ let onSubmit = async (e) => {
 
   let lastMemory = await getMemory(memoryId);
   if (lastMemory == null) return quit("Memory not found");
-  if (lastMemory.type != "Uploaded") return quit("Memory is not of type 'Uploaded'");
-  if (lastMemory.creatorId != userId) return quit("Memory does not belong to the user");
+  // Images, unlike memories, don;t have the type field and are assumed to be uploaded.
+  // We can skip the check alltogether I guess.. Or only check if it does have the type field
+  // if (lastMemory.type != "Uploaded") return quit("Memory is not of type 'Uploaded'");
+  if ((lastMemory.creatorId ?? lastMemory.uploader_id) != userId)
+    return quit("Memory does not belong to the user");
 
-  return redirect(userId, lastMemory.timestamp);
+  return redirect(userId, lastMemory.timestamp ?? lastMemory.uploaded_at);
 };
 
 document.addEventListener("DOMContentLoaded", (_event) => {
