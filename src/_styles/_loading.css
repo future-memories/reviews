@@ -1,0 +1,30 @@
+#loading-modal {
+    position: fixed;
+    height: 20vh;
+    width: 30rem;
+    top: 40vh;
+    left: calc(50% - 15rem);
+
+    display: grid;
+    place-items: center;
+    place-content: center;
+
+    color: black;
+    background-color: white;
+    border-radius: 8px;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#loading-modal > progress { width: 90%; }
+
+body.loading > *:not(#loading-modal) {
+    filter: blur(5px);
+    pointer-events: none;
+}
+
+body:not(.loading) > *:not(#loading-modal) {
+    filter: blur(0);
+    transition: filter 0.7s ease-in-out;
+}

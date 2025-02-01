@@ -100,12 +100,29 @@ let getThisReview = async () => {
   }
 }
 
+window.loadedImages = 0;
+let updateProgress = () => {
+  window.loadedImages += 1;
+
+  $('#progress-text').innerText = `${window.loadedImages}/${window.memoryCards.length}`;
+  $('#loading-modal > progress').value = window.loadedImages;
+
+  if (window.loadedImages == window.memoryCards.length) {
+    $('body').classList.remove('loading');
+    setTimeout(() => {
+      $('#loading-modal').style.display = 'none'
+    }, 500);
+  }
+};
+
 let createMemoryCard = (data) => {
   let card = document.createElement('div');
   card.className = 'card';
 
   let img = document.createElement('img');
   img.src = `https://xiw.io/cdn-cgi/image/width=400,quality=95/${data.imageUrl}`;
+  img.onload = updateProgress;
+  img.onerror = updateProgress;
   card.appendChild(img);
 
   let text = document.createElement('p');
@@ -215,6 +232,11 @@ let onSubmit = async (e) => {
 let onLoad = (_event) => {
   console.log('[EVENT] DOMContentLoaded');
   let main = $('#memories');
+
+  let totalMemories = window.memoryCards.length
+  $('#progress-text').innerText = `0/${totalMemories}`;
+  $('#loading-modal > progress').max = totalMemories;
+
   window.memoryCards.forEach(card => {
     main.appendChild(card);
   });

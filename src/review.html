@@ -6,12 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DEMO: FM Reviews</title>
     <link rel="stylesheet" href="_styles/main.css">
+    <link rel="stylesheet" href="_styles/_loading.css">
     <link rel="stylesheet" href="_styles/review.css">
-    <script defer src="_scripts/review-14dec20532234b823b537a10610b14f14d659b1a.mjs" type="module"></script>
+    <script defer src="_scripts/review-0e07c93c795afcee17dc8e13727711e046e64b61.mjs" type="module"></script>
     <script defer src="_scripts/controls-3317cfa4ccd385a29cb58465df15f9339e1d20c2.js"></script>
 </head>
 
-<body>
+<body class="loading">
+    <div id="loading-modal">
+        <p>Loading... (<span id="progress-text">0/0</span> memories)</p>
+        <progress max="100" value="0"></progress>
+    </div>
     <main>
         <h1 style="text-align: center; margin-block: 0.5rem;">FM Reviews</h1>
 
